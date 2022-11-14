@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        >
+        <LinearLayout
+            android:id="@+id/list_layout_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/quickAdd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:gravity="bottom"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/quickAddText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="8"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:hint="입력하여 빠르게 저장" />
+        <ImageButton
+            android:id="@+id/addBtn"
+            android:src="@drawable/add_icon"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"/>
+        <ImageButton
+            android:id="@+id/checkBtn"
+            android:src="@drawable/check_icon"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            android:scaleType="fitCenter"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/change_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:backgroundTint="#AADBFF"
+            android:layout_weight="1"
+            android:text="할 일 목록"
+            android:textColor="#000000"/>
+        <Button
+            android:id="@+id/completeBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="완료한 목록"
+            android:textColor="#000000"
+            android:backgroundTint="#FFFF8C"/>
+    </LinearLayout>
+
+
+
+
+
+
+</LinearLayout>
+
+
