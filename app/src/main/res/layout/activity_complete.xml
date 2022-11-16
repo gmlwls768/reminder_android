@@ -7,20 +7,19 @@
     tools:context=".CompleteActivity"
     android:orientation="vertical"
     android:id="@+id/completeLayout">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="20">
+        android:layout_weight="20"
+        >
         <LinearLayout
+            android:id="@+id/list_layout_parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/completeListLayout"
-            >
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="it is complete list"/>
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
         </LinearLayout>
     </ScrollView>
 
