@@ -11,21 +11,22 @@
         android:id="@+id/workListLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="10">
+        android:layout_weight="10"
+        android:orientation="vertical">
 
         <EditText
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:hint="work list" />
+            android:hint="제목을 입력하세요" />
 
         <EditText
             android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:hint="work list" />
+            android:layout_height="match_parent"
+            android:hint="내용을 입력하세요"
+            android:gravity="top" />
     </LinearLayout>
 
     <LinearLayout
@@ -34,31 +35,30 @@
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_height="match_parent"
             android:text="알림 날짜 설정 " />
-        <Switch
-            android:id="@+id/timeSetSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageButton
+            android:id="@+id/timeBtn"
+            android:layout_width="50dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <DatePicker
-                android:id="@+id/timeSetDatepicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:datePickerMode="spinner"
-                android:calendarViewShown="false"
-                android:visibility="gone" />
-            <TimePicker
-                android:id="@+id/timeSetTimepicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:timePickerMode="spinner"
-                android:visibility="gone"/>
+            android:src="@drawable/time_icon" />
+        <ImageButton
+            android:id="@+id/chkBtn"
+            android:layout_width="50dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:layout_height="wrap_content"
+            android:src="@drawable/check_icon" />
 
-        </LinearLayout>
+        <TextView
+            android:id="@+id/timeText"
+            android:gravity="center"
+            android:hint="현재 알림이 설정되어 있지 않습니다."
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 
@@ -73,6 +73,7 @@
             android:gravity="center"
             android:layout_margin="10dp"/>
         <RadioGroup
+            android:id="@+id/priorityGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
