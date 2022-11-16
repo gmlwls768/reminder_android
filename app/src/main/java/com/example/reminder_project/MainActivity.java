@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
             dbIdView.setText(cursor.getString(0)); //View의 텍스트 값을 toDoTable의 ID 컬럼의 값으로 설정
 
             tv.setOnClickListener(new View.OnClickListener() { //클릭시 목록 수정페이지로 이동
+                @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getApplicationContext(), WorkActivity.class);

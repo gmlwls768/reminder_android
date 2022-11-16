@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".WorkActivity"
     android:orientation="vertical">
-
     <LinearLayout
         android:id="@+id/workListLayout"
         android:layout_width="match_parent"
@@ -34,31 +33,27 @@
         android:orientation="horizontal">
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_height="match_parent"
             android:text="알림 날짜 설정 " />
-        <Switch
-            android:id="@+id/timeSetSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageButton
+            android:id="@+id/timeBtn"
+            android:layout_width="50dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <DatePicker
-                android:id="@+id/timeSetDatepicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:datePickerMode="spinner"
-                android:calendarViewShown="false"
-                android:visibility="gone" />
-            <TimePicker
-                android:id="@+id/timeSetTimepicker"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:timePickerMode="spinner"
-                android:visibility="gone"/>
-
-        </LinearLayout>
+            android:src="@drawable/time_icon" />
+        <ImageButton
+            android:id="@+id/chkBtn"
+            android:layout_width="50dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:layout_height="wrap_content"
+            android:src="@drawable/check_icon" />
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
 
