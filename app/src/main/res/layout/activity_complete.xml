@@ -25,7 +25,7 @@
     </ScrollView>
 
     <LinearLayout
-        android:id="@+id/change_layout"
+        android:id="@+id/changeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"

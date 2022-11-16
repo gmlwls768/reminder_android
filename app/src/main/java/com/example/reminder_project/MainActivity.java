@@ -23,61 +23,60 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class MainActivity extends AppCompatActivity {
-    TextView listItem;
+    ToDoTable todo; //A helper class to manage database creation and version management.
+    SQLiteDatabase sqlDB;
+    LinearLayout listLayoutParent;
     Button completeBtn;
     ImageButton addBtn;
     EditText quickAddText;
-    ToDoTable todo; //todo 테이블
-    SQLiteDatabase sqlDB;
-    LinearLayout container;
+    Cursor cursor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         todo = new ToDoTable(this);
-        completeBtn = (Button)  findViewById(R.id.completeBtn);
-        sqlDB = todo.getReadableDatabase();
-        Cursor cursor;
-        cursor = sqlDB.rawQuery("SELECT * FROM toDo;", null);
+        sqlDB = todo.getReadableDatabase(); //Create and/or open a database
+        cursor = sqlDB.rawQuery("SELECT * FROM toDo;", null); //데이터베이스의 모든 값을 가져옴
+        completeBtn = (Button) findViewById(R.id.completeBtn);
+        quickAddText = (EditText) findViewById(R.id.quickAddText);
+        addBtn = (ImageButton) findViewById(R.id.addBtn);
+        listLayoutParent = (LinearLayout) findViewById(R.id.list_layout_parent);
 
-        container = (LinearLayout) findViewById(R.id.list_layout_parent);
-        int add_layout = 0;
         while (cursor.moveToNext()) {
-            LinearLayout ll= new LinearLayout(getApplicationContext());
-            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-            ll.setLayoutParams(p);
-            ll.setOrientation(LinearLayout.HORIZONTAL);
-            CheckBox cb = new CheckBox(getApplicationContext());
-            LinearLayout.LayoutParams w = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT); //너비, 높이 설정 단축어
+            LinearLayout.LayoutParams w = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT); //너비, 높이 설정 단축어
+            LinearLayout listItemBox= new LinearLayout(getApplicationContext()); //각각의 할일 목록을 감싸는 레이아웃
+            listItemBox.setLayoutParams(p); //너비, 높이 설정
+            listItemBox.setOrientation(LinearLayout.HORIZONTAL); //수평 정렬
+            int listId = Integer.parseInt(cursor.getString(0));
+            
+            CheckBox cb = new CheckBox(getApplicationContext()); //listItemBox 내 사용될 CheckBox
             cb.setLayoutParams(w);
-            ll.addView(cb);
-            TextView tv= new TextView(getApplicationContext());
+            
+            TextView tv= new TextView(getApplicationContext()); //listItemBox 내 사용될 TextView
             tv.setLayoutParams(w);
-            tv.setText(cursor.getString(1));
-            tv.setSingleLine();
-            tv.setOnClickListener(new View.OnClickListener() {
+            tv.setText(cursor.getString(1)); //View의 텍스트 값을 toDoTable의 TITLE 컬럼의 값으로 설정
+            
+            TextView dbIdView= new TextView(getApplicationContext()); //listItemBox 내 사용될 TextView
+            dbIdView.setLayoutParams(w);
+            dbIdView.setVisibility(View.GONE);
+            dbIdView.setText(cursor.getString(0)); //View의 텍스트 값을 toDoTable의 ID 컬럼의 값으로 설정
+
+            tv.setOnClickListener(new View.OnClickListener() { //클릭시 목록 수정페이지로 이동
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
+                    intent.putExtra("id", listId);
                     startActivity(intent);
-
                 }
             });
-            TextView tvminus= new TextView(getApplicationContext());
-            tvminus.setLayoutParams(w);
-            tvminus.setVisibility(View.GONE);
-            tvminus.setText(cursor.getString(0));
-            cb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    String content = tv.getText().toString();
-                    Toast.makeText(getApplicationContext(), content,Toast.LENGTH_SHORT).show();
-                }
-            });
-            ll.addView(tv);
-            container.addView(ll);
+            
+            listItemBox.addView(cb); //자식 위젯 설절
+            listItemBox.addView(tv); //자식 위젯 설절
+            listLayoutParent.addView(listItemBox); //자식 위젯 설절
         }
-
+        cursor.close();
 
         completeBtn.setOnClickListener(new View.OnClickListener() { //완료한 목록 페이지로 이동
             @Override
@@ -88,17 +87,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        quickAddText = (EditText) findViewById(R.id.quickAddText);
-        addBtn = (ImageButton) findViewById(R.id.addBtn);
-        quickAddText.addTextChangedListener(new TextWatcher() {
+        quickAddText.addTextChangedListener(new TextWatcher() { //키보드 이벤트가 발생할 경우
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { // 입력하기 전에 조치
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (quickAddText.getText().toString().equals("")){
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { //입력난에 변화가 있을 시 조치
+                if (quickAddText.getText().toString().equals("")) { //입력된 내용에 따라 이미지 변경
                     addBtn.setImageResource(R.drawable.add_icon);
                 }
                 else {
@@ -107,29 +104,35 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
+            public void afterTextChanged(Editable editable) { // 입력이 끝났을 때 조치
 
             }
         });
+
         addBtn.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
+            @RequiresApi(api = Build.VERSION_CODES.O) //API 경고 무시
             @Override
             public void onClick(View view) {
                 if (quickAddText.getText().toString().equals("")){ //quickAddText가 공백일 경우 목록 추가(수정) 페이지로 이동
                     Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
                     startActivity(intent);
-                } else{
+                } else{ //그렇지 않을 경우 toDoTable에 입력받은 값을 추가
                     LocalDateTime now = LocalDateTime.now();
                     sqlDB = todo.getWritableDatabase();
-
+                    String title = quickAddText.getText().toString();
                     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm/ss"));
-                    sqlDB.execSQL("INSERT INTO toDo (CONTENTS,  PRIORITY, LOCATION, ALERT, ON_CREATE, IS_COMPLETE, ON_COMPLETED) VALUES('" + quickAddText.getText().toString() + "'," + " 0, 'none', 'none', '" + formatedNow +"', 0, 'none');");
+
+                    //toDoTable 데이터 추가
+//                    sqlDB.execSQL("INSERT INTO toDo (TITLE, CONTENTS,  PRIORITY, LOCATION, ALERT, ON_CREATE, IS_COMPLETE, ON_COMPLETED) VALUES('" + title + "','none'," + " 0, 'none', 'none', '" + formatedNow +"', 0, 'none');");
+                    sqlDB.execSQL("INSERT INTO toDo (TITLE, ON_CREATE) VALUES('" + title + "','" + formatedNow +"');");
+
                     sqlDB.close();
                     quickAddText.setText("");
-                    Toast.makeText(getApplicationContext(), "INSERT INTO toDo VALUES('" + quickAddText.getText().toString() + "'," + " 0, 'none', 'none', '" + formatedNow +"');",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), title + "을 추가하였습니다", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
     }
 }
 
