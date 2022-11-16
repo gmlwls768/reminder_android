@@ -29,8 +29,6 @@ public class WorkActivity extends AppCompatActivity {
     public static final int FIELD_NAME_IS_COMPLETE = 6;
     public static final int FIELD_NAME_ID_ON_COMPLETED = 7;
 
-
-
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
     Cursor cursor;
@@ -69,7 +67,6 @@ public class WorkActivity extends AppCompatActivity {
 //            if(cursor.getString(FIELD_NAME_ON_CREATE) != null){
 //
 //            }
-
         }
 
 
