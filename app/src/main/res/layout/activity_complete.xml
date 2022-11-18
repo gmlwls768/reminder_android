@@ -18,7 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_margin="15dp">
 
         </LinearLayout>
     </ScrollView>
@@ -35,7 +36,7 @@
             android:id="@+id/todoBtn"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:backgroundTint="#AADBFF"
+            android:backgroundTint="#FFFF8C"
             android:layout_weight="1"
             android:text="할 일 목록"
             android:textColor="#000000"/>
@@ -46,6 +47,6 @@
             android:layout_weight="1"
             android:text="완료한 목록"
             android:textColor="#000000"
-            android:backgroundTint="#FFFF8C"/>
+            android:backgroundTint="#AADBFF" />
     </LinearLayout>
 </LinearLayout>

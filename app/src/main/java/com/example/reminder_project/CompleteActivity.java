@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -34,6 +36,7 @@ public class CompleteActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().setWindowAnimations(0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complete);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -48,8 +51,12 @@ public class CompleteActivity extends AppCompatActivity {
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT); //너비, 높이 설정 단축어
             LinearLayout.LayoutParams w = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT); //너비, 높이 설정 단축어
             LinearLayout listItemBox= new LinearLayout(getApplicationContext()); // 각각의 할일 목록을 감싸는 레이아웃
+            LinearLayout oneBox = new LinearLayout(getApplicationContext());
+            oneBox.setLayoutParams(p);
+            oneBox.setGravity(Gravity.RIGHT);
             listItemBox.setLayoutParams(p); //너비, 높이 설정
             listItemBox.setOrientation(LinearLayout.HORIZONTAL); // 수평 정렬
+
             int listId = Integer.parseInt(cursor.getString(FIELD_NAME_ID));
             CheckBox cb = new CheckBox(getApplicationContext()); // listItemBox 내 사용될 CheckBox
             cb.setLayoutParams(w);
@@ -57,6 +64,18 @@ public class CompleteActivity extends AppCompatActivity {
             TextView tv= new TextView(getApplicationContext()); // listItemBox 내 사용될 TextView
             tv.setLayoutParams(w);
             tv.setText(cursor.getString(FIELD_NAME_TITLE)); // View의 텍스트 값을 toDoTable의 TITLE 컬럼의 값으로 설정
+
+            TextView tvPriority= new TextView(getApplicationContext()); // listItemBox 내 사용될 TextView
+            tvPriority.setLayoutParams(w);
+            int tempPriority = Integer.parseInt(cursor.getString(FIELD_NAME_PRIORITY));
+            String tempPriorityText = "";
+            if(tempPriority>=1) {
+                for (int i = 0; i < tempPriority; i++) {
+                    tempPriorityText += "★";
+                }
+            }
+            tvPriority.setText(tempPriorityText);
+            tvPriority.setTextColor(Color.RED);
 
             TextView dbIdView= new TextView(getApplicationContext()); //listItemBox 내 사용될 TextView
             dbIdView.setLayoutParams(w);
@@ -72,12 +91,15 @@ public class CompleteActivity extends AppCompatActivity {
                     intent = getIntent(); //인텐트
                     startActivity(intent); //액티비티 열기
                     overridePendingTransition(0, 0);//인텐트 효과 없애기
+                    Toast.makeText(getApplicationContext(), "할일 목록이 삭제 되었습니다",Toast.LENGTH_SHORT).show();
                 }
             });
-
+            oneBox.addView(tvPriority);
             listItemBox.addView(cb); //자식 위젯 설절
             listItemBox.addView(tv); //자식 위젯 설절
             listLayoutParent.addView(listItemBox); //자식 위젯 설절
+            listItemBox.addView(oneBox);
+
         }
         cursor.close();
 
@@ -85,6 +107,7 @@ public class CompleteActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 finish();
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
                 Toast.makeText(getApplicationContext(), "할일 목록으로 이동하였습니다!",Toast.LENGTH_SHORT).show();
             }
 

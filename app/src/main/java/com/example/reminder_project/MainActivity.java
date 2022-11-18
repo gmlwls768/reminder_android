@@ -7,10 +7,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -19,6 +21,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,12 +47,14 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addBtn;
     EditText quickAddText;
     Intent intent;
-
+    GoogleMap mmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id)
+
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
         todo = new ToDoTable(this);
@@ -62,6 +69,10 @@ public class MainActivity extends AppCompatActivity {
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT); //너비, 높이 설정 단축어
             LinearLayout.LayoutParams w = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.MATCH_PARENT); //너비, 높이 설정 단축어
             LinearLayout listItemBox= new LinearLayout(getApplicationContext()); // 각각의 할일 목록을 감싸는 레이아웃
+            LinearLayout oneBox = new LinearLayout(getApplicationContext());
+            oneBox.setLayoutParams(p);
+            oneBox.setGravity(Gravity.RIGHT);
+
             listItemBox.setLayoutParams(p); //너비, 높이 설정
             listItemBox.setOrientation(LinearLayout.HORIZONTAL); // 수평 정렬
             int listId = Integer.parseInt(cursor.getString(FIELD_NAME_ID));
@@ -71,7 +82,18 @@ public class MainActivity extends AppCompatActivity {
             TextView tv= new TextView(getApplicationContext()); // listItemBox 내 사용될 TextView
             tv.setLayoutParams(w);
             tv.setText(cursor.getString(FIELD_NAME_TITLE)); // View의 텍스트 값을 toDoTable의 TITLE 컬럼의 값으로 설정
-            
+
+            TextView tvPriority= new TextView(getApplicationContext()); // listItemBox 내 사용될 TextView
+            tvPriority.setLayoutParams(w);
+            int tempPriority = Integer.parseInt(cursor.getString(FIELD_NAME_PRIORITY));
+            String tempPriorityText = "";
+            if(tempPriority>=1){
+                for(int i =0; i<tempPriority; i++){
+                    tempPriorityText += "★";
+                }
+            }
+            tvPriority.setText(tempPriorityText);
+            tvPriority.setTextColor(Color.RED);
             TextView dbIdView= new TextView(getApplicationContext()); //listItemBox 내 사용될 TextView
             dbIdView.setLayoutParams(w);
             dbIdView.setVisibility(View.GONE);
@@ -84,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
                     intent.putExtra("id", listId);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);//인텐트 효과 없애기
+
                 }
             });
 
@@ -95,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm/ss")); //현재날짜 설정
                     sqlDB.execSQL("UPDATE toDo SET IS_COMPLETE = 1 WHERE ID = " + listId + ";");
                     sqlDB.execSQL("UPDATE toDo SET ON_COMPLETED = " + formatedNow + " WHERE ID = " + listId + ";");
+                    Toast.makeText(getApplicationContext(), "할 일 완료!",Toast.LENGTH_SHORT).show();
                     finish();//인텐트 종료
                     overridePendingTransition(0, 0);//인텐트 효과 없애기
                     intent = getIntent(); //인텐트
@@ -105,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
 
             listItemBox.addView(cb); //자식 위젯 설절
             listItemBox.addView(tv); //자식 위젯 설절
+            oneBox.addView(tvPriority);
+            listItemBox.addView(oneBox);
             listLayoutParent.addView(listItemBox); //자식 위젯 설절
         }
         cursor.close();
@@ -113,7 +140,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CompleteActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
                 Toast.makeText(getApplicationContext(), "완료한 페이지 목록으로 이동하였습니다!",Toast.LENGTH_SHORT).show();
             }
         });
@@ -147,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
                 if (quickAddText.getText().toString().equals("")){ //quickAddText가 공백일 경우 목록 추가(수정) 페이지로 이동
                     Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
                     startActivity(intent);
+                    overridePendingTransition(0, 0);//인텐트 효과 없애기
+
                 } else{ //그렇지 않을 경우 toDoTable에 입력받은 값을 추가
                     now = LocalDateTime.now();
                     sqlDB = todo.getWritableDatabase();
@@ -158,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
                     quickAddText.setText("");
                     Toast.makeText(getApplicationContext(), title + "을 추가하였습니다", Toast.LENGTH_SHORT).show();
                     finish();//인텐트 종료
-                    overridePendingTransition(0, 0);//인텐트 효과 없애기
                     intent = getIntent(); //인텐트
                     startActivity(intent); //액티비티 열기
                     overridePendingTransition(0, 0);//인텐트 효과 없애기

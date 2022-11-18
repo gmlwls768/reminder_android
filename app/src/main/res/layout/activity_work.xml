@@ -120,6 +120,10 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="장소"/>
+        
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
         <EditText
             android:id="@+id/placeInfo"
             android:layout_width="wrap_content"

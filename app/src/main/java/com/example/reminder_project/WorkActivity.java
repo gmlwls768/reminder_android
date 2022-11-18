@@ -3,9 +3,14 @@ package com.example.reminder_project;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -26,6 +31,7 @@ import android.widget.Toast;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 
 
 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -40,6 +46,8 @@ public class WorkActivity extends AppCompatActivity {
     public static final int FIELD_NAME_IS_COMPLETE = 6;
     public static final int FIELD_NAME_ID_ON_COMPLETED = 7;
 
+//    AlarmManager alarmManager;
+//    PendingIntent pendingIntent;
 
     int y = 0, m = 0, d = 0, h = 0, mi = 0; // 사용자가 설정한 시간
     ToDoTable todo; //A helper class to manage database creation and version management.
@@ -55,11 +63,17 @@ public class WorkActivity extends AppCompatActivity {
     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm"));
     String timeNow [] = formatedNow.split("/");
 
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
+
+//        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+//        final Calendar calendar = Calendar.getInstance();
+
+
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
         todo = new ToDoTable(this);
@@ -112,9 +126,14 @@ public class WorkActivity extends AppCompatActivity {
                 h = Integer.parseInt(userAlertTime[3]);
                 mi = Integer.parseInt(userAlertTime[4]);
                 timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
+
+//                calendar.set(y,m,d,h,mi);
+//                alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+//                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),AlarmManager.INTERVAL_HOUR,pendingIntent);
             }
 
             if(cursor.getString(FIELD_NAME_LOCATION) != null){ //장소 설정
+
                 placeInfo.setText(cursor.getString(FIELD_NAME_LOCATION));
             }
 
@@ -172,6 +191,8 @@ public class WorkActivity extends AppCompatActivity {
                 finish();
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
+
             }
         });
     }
@@ -198,12 +219,14 @@ public class WorkActivity extends AppCompatActivity {
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 h = hourOfDay;
                 mi = minute;
-
             }
         }, Integer.parseInt(timeNow[3]), Integer.parseInt(timeNow[4]), true);
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         timePickerDialog.setMessage("시간을 선택하시오");
         timePickerDialog.show();
-//        timePickerDialog.onTimeChanged(timePickerDialog.setContentView(this););
+    }
+
+    void showlocation(){
+
     }
 }
