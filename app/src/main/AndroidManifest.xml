@@ -12,9 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Reminder_project"
         tools:targetApi="31">
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="API키" />
+<!--        <meta-data-->
+<!--            android:name="com.google.android.geo.API_KEY"-->
+<!--            android:value="API키" />-->
         <activity
             android:name=".WorkActivity"
             android:exported="false">
