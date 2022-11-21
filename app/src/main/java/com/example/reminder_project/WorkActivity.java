@@ -3,14 +3,10 @@ package com.example.reminder_project;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import android.app.AlarmManager;
+
 import android.app.DatePickerDialog;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.Context;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,17 +17,14 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 
 
 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -44,7 +37,7 @@ public class WorkActivity extends AppCompatActivity {
     public static final int FIELD_NAME_LOCATION = 4;
     public static final int FIELD_NAME_ON_CREATE = 5;
     public static final int FIELD_NAME_IS_COMPLETE = 6;
-    public static final int FIELD_NAME_ID_ON_COMPLETED = 7;
+    public static final int FIELD_NAME_ON_COMPLETE = 7;
 
 //    AlarmManager alarmManager;
 //    PendingIntent pendingIntent;
@@ -180,11 +173,29 @@ public class WorkActivity extends AppCompatActivity {
                 }
                 String myLocation = placeInfo.getText().toString();
                 sqlDB = todo.getWritableDatabase();
-                if(y != 0){
+                ContentValues cv = new ContentValues();
+                cv.put("TITLE", myTitle); //These Fields should be your String values of actual column names
+                cv.put("CONTENTS", myContents);
+                cv.put("PRIORITY", myPriority);
+                cv.put("LOCATION", myLocation);
+
+                if(y != 0){ //날짜가 지정되지 않은 경우
                     String myAlert = Integer.toString(y) + "/" + Integer.toString(m) + "/" + Integer.toString(d) + "/" + Integer.toString(h) + "/" + Integer.toString(mi);
-                    sqlDB.execSQL("INSERT INTO toDo (TITLE, CONTENTS, PRIORITY, LOCATION, ALERT , ON_CREATE) VALUES('" + myTitle + "','" + myContents + "', '" + myPriority + "', '" + myLocation + "', '" + myAlert + "', '" + formatedNow + "');"); //toDoTable 데이터 추가
+                    cv.put("ALERT", myAlert);
+                    if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
+                        sqlDB.update("toDo", cv, "id=" + id, null);
+                    }else{
+                        cv.put("ON_CREATE", formatedNow);
+                        sqlDB.insert("toDo", null, cv);
+                    }
+
                 }else {
-                    sqlDB.execSQL("INSERT INTO toDo (TITLE, CONTENTS, PRIORITY, LOCATION, ON_CREATE) VALUES('" + myTitle + "','" + myContents + "', '" + myPriority + "', '" + myLocation + "', '" + formatedNow + "');"); //toDoTable 데이터 추가
+                    if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
+                        sqlDB.update("toDo", cv, "id=" + id, null);
+                    }else{
+                        cv.put("ON_CREATE", formatedNow);
+                        sqlDB.insert("toDo", null, cv);
+                    }
                 }
                 sqlDB.close();
                 Toast.makeText(getApplicationContext(), "할일목록을 저장하였습니다!", Toast.LENGTH_SHORT).show();
@@ -224,9 +235,5 @@ public class WorkActivity extends AppCompatActivity {
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         timePickerDialog.setMessage("시간을 선택하시오");
         timePickerDialog.show();
-    }
-
-    void showlocation(){
-
     }
 }

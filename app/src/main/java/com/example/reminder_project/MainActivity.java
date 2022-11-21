@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,6 +28,8 @@ import android.widget.Toast;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
     public static final int FIELD_NAME_ID = 0;
@@ -36,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int FIELD_NAME_LOCATION = 4;
     public static final int FIELD_NAME_ON_CREATE = 5;
     public static final int FIELD_NAME_IS_COMPLETE = 6;
-    public static final int FIELD_NAME_ID_ON_COMPLETED = 7;
+    public static final int FIELD_NAME_ON_COMPLETED = 7;
 
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
@@ -47,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
     ImageButton addBtn;
     EditText quickAddText;
     Intent intent;
+    LinkedList<LinearLayout> highPriorityList;
+    LinkedList<LinearLayout> mediumPriorityList;
+    LinkedList<LinearLayout> lowPriorityList;
+    LinkedList<LinearLayout> nonePriorityList;
+    Iterator<LinearLayout> ir;
+
 //    GoogleMap mmap;
 
     @Override
@@ -64,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
         quickAddText = (EditText) findViewById(R.id.quickAddText);
         addBtn = (ImageButton) findViewById(R.id.addBtn);
         listLayoutParent = (LinearLayout) findViewById(R.id.list_layout_parent);
+        highPriorityList = new LinkedList<>(); // 높은 우선순위 목록
+        mediumPriorityList = new LinkedList<>(); // 중간 우선순위 목록
+        lowPriorityList = new LinkedList<>(); // 낮은 우선순위 목록
+        nonePriorityList = new LinkedList<>(); //우선순위 없은 목록
 
         while (cursor.moveToNext()) {
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT); //너비, 높이 설정 단축어
@@ -95,9 +108,6 @@ public class MainActivity extends AppCompatActivity {
             tvPriority.setText(tempPriorityText);
             tvPriority.setTextColor(Color.RED);
             TextView dbIdView= new TextView(getApplicationContext()); //listItemBox 내 사용될 TextView
-            dbIdView.setLayoutParams(w);
-            dbIdView.setVisibility(View.GONE);
-            dbIdView.setText(cursor.getString(FIELD_NAME_ID)); // View의 텍스트 값을 toDoTable의 ID 컬럼의 값으로 설정
 
             tv.setOnClickListener(new View.OnClickListener() { // 클릭 시 목록 수정페이지로 이동
                 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -117,9 +127,13 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     now = LocalDateTime.now();
                     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm/ss")); //현재날짜 설정
-                    sqlDB.execSQL("UPDATE toDo SET IS_COMPLETE = 1 WHERE ID = " + listId + ";");
-                    sqlDB.execSQL("UPDATE toDo SET ON_COMPLETED = " + formatedNow + " WHERE ID = " + listId + ";");
+
+                    ContentValues cv = new ContentValues();
+                    cv.put("IS_COMPLETE", "1"); //These Fields should be your String values of actual column names
+                    cv.put("ON_CREATE", formatedNow);
+                    sqlDB.update("toDo", cv, "id=" + listId, null);
                     Toast.makeText(getApplicationContext(), "할 일 완료!",Toast.LENGTH_SHORT).show();
+
                     finish();//인텐트 종료
                     overridePendingTransition(0, 0);//인텐트 효과 없애기
                     intent = getIntent(); //인텐트
@@ -128,13 +142,53 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            listItemBox.addView(cb); //자식 위젯 설절
-            listItemBox.addView(tv); //자식 위젯 설절
+            listItemBox.addView(cb); //자식 위젯 설정
+            listItemBox.addView(tv); //자식 위젯 설정
             oneBox.addView(tvPriority);
             listItemBox.addView(oneBox);
-            listLayoutParent.addView(listItemBox); //자식 위젯 설절
+            String priority = cursor.getString(FIELD_NAME_PRIORITY);
+            switch (priority){ //우선순위에 따라 리스트에 담는다
+                case "0":
+                    nonePriorityList.add(listItemBox);
+                    break;
+                case "1":
+                    lowPriorityList.add(listItemBox);
+                    break;
+                case "2":
+                    mediumPriorityList.add(listItemBox);
+                    break;
+                case "3":
+                    highPriorityList.add(listItemBox);
+                    break;
+            }
         }
         cursor.close();
+
+        //높음, 중간, 낮음, 없음순으로 목록을 정렬한다
+        //각 우선순위에서는 목록을 저장한 순서대로 정렬한다.
+        ir = highPriorityList.iterator();
+        while (ir.hasNext()){
+            LinearLayout childLayout = ir.next();
+            listLayoutParent.addView(childLayout);
+        }
+
+        ir = mediumPriorityList.iterator();
+        while (ir.hasNext()){
+            LinearLayout childLayout = ir.next();
+            listLayoutParent.addView(childLayout);
+        }
+
+        ir = lowPriorityList.iterator();
+        while (ir.hasNext()){
+            LinearLayout childLayout = ir.next();
+            listLayoutParent.addView(childLayout);
+        }
+
+        ir = nonePriorityList.iterator();
+        while (ir.hasNext()){
+            LinearLayout childLayout = ir.next();
+            listLayoutParent.addView(childLayout);
+        }
 
         completeBtn.setOnClickListener(new View.OnClickListener() { //완료한 목록 페이지로 이동
             @Override
@@ -184,10 +238,14 @@ public class MainActivity extends AppCompatActivity {
                     String title = quickAddText.getText().toString();
                     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm/ss")); //현재날짜 설정
 
-                    sqlDB.execSQL("INSERT INTO toDo (TITLE, ON_CREATE) VALUES('" + title + "','" + formatedNow +"');"); //toDoTable 데이터 추가
+                    ContentValues cv = new ContentValues();
+                    cv.put("TITLE", title); //These Fields should be your String values of actual column names
+                    cv.put("ON_CREATE", formatedNow);
+                    sqlDB.insert("toDo", null, cv);
                     sqlDB.close();
                     quickAddText.setText("");
                     Toast.makeText(getApplicationContext(), title + "을 추가하였습니다", Toast.LENGTH_SHORT).show();
+
                     finish();//인텐트 종료
                     intent = getIntent(); //인텐트
                     startActivity(intent); //액티비티 열기
