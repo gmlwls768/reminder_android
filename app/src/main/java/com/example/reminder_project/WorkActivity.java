@@ -3,21 +3,15 @@ package com.example.reminder_project;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 
-import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.Context;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -29,22 +23,13 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class WorkActivity extends AppCompatActivity {
-
-    public static final String TAG = "MAIN";
-//    private Context context;
-
-    //    Database Filed
+    //Database Filed
     public static final int FIELD_NAME_ID = 0;
     public static final int FIELD_NAME_TITLE = 1;
     public static final int FIELD_NAME_CONTENTS = 2;
@@ -52,11 +37,11 @@ public class WorkActivity extends AppCompatActivity {
     public static final int FIELD_NAME_LOCATION = 4;
     public static final int FIELD_NAME_ON_CREATE = 5;
     public static final int FIELD_NAME_IS_COMPLETE = 6;
-    public static final int FIELD_NAME_ID_ON_COMPLETED = 7;
+    public static final int FIELD_NAME_ON_COMPLETE = 7;
 
-    AlarmManager alarmManager;
-    NotificationManager notificationManager;
-    NotificationCompat.Builder builder;
+//    AlarmManager alarmManager;
+//    PendingIntent pendingIntent;
+
     int y = 0, m = 0, d = 0, h = 0, mi = 0; // 사용자가 설정한 시간
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
@@ -71,16 +56,15 @@ public class WorkActivity extends AppCompatActivity {
     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm"));
     String timeNow [] = formatedNow.split("/");
 
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+//        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 //        final Calendar calendar = Calendar.getInstance();
-        notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -136,9 +120,8 @@ public class WorkActivity extends AppCompatActivity {
                 mi = Integer.parseInt(userAlertTime[4]);
                 timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
 
-
-//                setAlarm();
-
+//                calendar.set(y,m,d,h,mi);
+//                alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
 //                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),AlarmManager.INTERVAL_HOUR,pendingIntent);
             }
 
@@ -155,55 +138,16 @@ public class WorkActivity extends AppCompatActivity {
             public void onClick(View view) {
                 showTime();
                 showDate();
-
             }
         });
-
 
 
         chkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-
             public void onClick(View view) {
                 timeText.setText("Date: " +y + "." + m + "." + d + "\n" + "Time: " + h + ":" + mi);
-
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(System.currentTimeMillis());
-//                c.set(Calendar.YEAR, y);
-//                c.set(Calendar.MONTH, m);
-//                c.set(Calendar.DAY_OF_MONTH, d);
-//                c.set(Calendar.HOUR_OF_DAY, h);
-//                c.set(Calendar.MINUTE, mi);
-//                c.set(Calendar.SECOND, 0);
-                String str = y + "-" + m + "-" + d + " " + h + ":" + mi + ":" + "0";
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = null;
-                try {
-                    date = dateFormat.parse(str);
-                } catch (ParseException e){
-                    e.printStackTrace();
-                }
-                c.setTime(date);
-//                new btnClickListener(getApplicationContext(), c);
-
-//                content.setText(c.toString());
-
-//                Toast.makeText(getApplicationContext(), c.toString(),Toast.LENGTH_SHORT).show();
-                Intent alarmIntent = new Intent(getApplicationContext(), AlarmNotification.class);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, PendingIntent.FLAG_MUTABLE);
-                AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-                if (alarmManager != null) {
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(),
-                            AlarmManager.INTERVAL_DAY, pendingIntent);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
-                    }
-                }
             }
-//
         });
-
 
 
 
@@ -229,11 +173,29 @@ public class WorkActivity extends AppCompatActivity {
                 }
                 String myLocation = placeInfo.getText().toString();
                 sqlDB = todo.getWritableDatabase();
-                if(y != 0){
+                ContentValues cv = new ContentValues();
+                cv.put("TITLE", myTitle); //These Fields should be your String values of actual column names
+                cv.put("CONTENTS", myContents);
+                cv.put("PRIORITY", myPriority);
+                cv.put("LOCATION", myLocation);
+
+                if(y != 0){ //날짜가 지정되지 않은 경우
                     String myAlert = Integer.toString(y) + "/" + Integer.toString(m) + "/" + Integer.toString(d) + "/" + Integer.toString(h) + "/" + Integer.toString(mi);
-                    sqlDB.execSQL("INSERT INTO toDo (TITLE, CONTENTS, PRIORITY, LOCATION, ALERT , ON_CREATE) VALUES('" + myTitle + "','" + myContents + "', '" + myPriority + "', '" + myLocation + "', '" + myAlert + "', '" + formatedNow + "');"); //toDoTable 데이터 추가
+                    cv.put("ALERT", myAlert);
+                    if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
+                        sqlDB.update("toDo", cv, "id=" + id, null);
+                    }else{
+                        cv.put("ON_CREATE", formatedNow);
+                        sqlDB.insert("toDo", null, cv);
+                    }
+
                 }else {
-                    sqlDB.execSQL("INSERT INTO toDo (TITLE, CONTENTS, PRIORITY, LOCATION, ON_CREATE) VALUES('" + myTitle + "','" + myContents + "', '" + myPriority + "', '" + myLocation + "', '" + formatedNow + "');"); //toDoTable 데이터 추가
+                    if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
+                        sqlDB.update("toDo", cv, "id=" + id, null);
+                    }else{
+                        cv.put("ON_CREATE", formatedNow);
+                        sqlDB.insert("toDo", null, cv);
+                    }
                 }
                 sqlDB.close();
                 Toast.makeText(getApplicationContext(), "할일목록을 저장하였습니다!", Toast.LENGTH_SHORT).show();
@@ -262,39 +224,6 @@ public class WorkActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-//    public Calendar setTime() {
-//        int hour_24, minute;
-
-//        if (Build.VERSION.SDK_INT >= 23) { // 현재 기기의 SDK 버전이 23이상이면
-//            hour_24 = timePicker.getHour();
-//            minute = timePicker.getMinute();
-//        } else { // 현재 기기의 SDK 버전이 23미만이면
-//            hour_24 = timePicker.getCurrentHour();
-//            minute = timePicker.getCurrentMinute();
-//        }
-//        hour_24 = y;
-//        minute = mi;
-        // 현재 지정된 시간으로 알람 시간 설정
-
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        calendar.set(Calendar.HOUR_OF_DAY, hour_24);
-//        calendar.set(Calendar.MINUTE, minute);
-//        calendar.set(Calendar.SECOND, 0);
-
-        // 이미 지난 시간을 지정했다면 다음날 같은 시간으로 설정
-//        if (calendar.before(Calendar.getInstance())) {
-//            calendar.add(Calendar.DATE, 1);
-//        }
-//
-//        Date currentDateTime = calendar.getTime();
-//        String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE요일 a hh시 mm분 ", Locale.getDefault()).format(currentDateTime);
-//        Toast.makeText(context, date + "으로 알림이 설정되었습니다!", Toast.LENGTH_SHORT).show();
-//
-//        return calendar;
-//    }
-
-
     void showTime() {
         TimePickerDialog timePickerDialog = new TimePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog_NoActionBar, new TimePickerDialog.OnTimeSetListener() {
             @Override
@@ -306,9 +235,5 @@ public class WorkActivity extends AppCompatActivity {
         timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         timePickerDialog.setMessage("시간을 선택하시오");
         timePickerDialog.show();
-    }
-
-    void showlocation(){
-
     }
 }
