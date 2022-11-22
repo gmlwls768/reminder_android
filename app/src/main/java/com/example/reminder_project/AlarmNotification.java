@@ -8,10 +8,10 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
 import androidx.core.app.NotificationCompat;
 
 public class AlarmNotification extends BroadcastReceiver {
+
     @Override
     public void onReceive(Context context, Intent intent) {
         //사용자에게 일어나는 이벤트를 알리는 클래스. 이것이 사용자에게 백그라운드에서 무슨 일이 일어났다고 알려주는 방법입니다.
@@ -21,8 +21,8 @@ public class AlarmNotification extends BroadcastReceiver {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent pendingI = PendingIntent.getActivity(context, 0,
-                notificationIntent, FLAG_IMMUTABLE);
+        //특정시점에 notificationIntent(MainActivity)을 실행함
+        PendingIntent pendingI = PendingIntent.getActivity(context,0, notificationIntent, FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "default");
 
@@ -55,7 +55,8 @@ public class AlarmNotification extends BroadcastReceiver {
 
         if (notificationManager != null) {
             // 노티피케이션 동작시킴
-            notificationManager.notify(1234, builder.build());
+            // System.currentTimeMills()를 이용, 현재 시간을 받아와 대입하여 그때그때 id값을 다르게 지정
+            notificationManager.notify(Math.round(10000000), builder.build());
         }
     }
 }

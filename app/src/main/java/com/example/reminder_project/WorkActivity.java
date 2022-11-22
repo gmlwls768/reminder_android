@@ -96,7 +96,8 @@ public class WorkActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
-
+                btnClickListener bc = new btnClickListener(getApplicationContext(), h, mi);
+                bc.onClick(view);
             }
         });
 

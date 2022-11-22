@@ -18,11 +18,14 @@ import java.util.Locale;
 
 public class btnClickListener implements View.OnClickListener {
     private Context context; // Activity Context(?)
-    private TimePicker timePicker;
+    private int hour;
+    private int minutes;
 
-    public btnClickListener(Context context, TimePicker timePicker) {
+    public btnClickListener(Context context, int hour, int minutes) {
         this.context = context;
-        this.timePicker = timePicker;
+        this.hour = hour;
+        this.minutes = minutes;
+
     }
 
     @Override
@@ -48,15 +51,8 @@ public class btnClickListener implements View.OnClickListener {
     }
 
     public Calendar setTime() { //날짜 설정 및 Toast 메시지 출력 후 Calender 객체 반환
-        int hour_24, minute;
-
-        if (Build.VERSION.SDK_INT >= 23) { // 현재 기기의 SDK 버전이 23이상이면
-            hour_24 = timePicker.getHour();
-            minute = timePicker.getMinute();
-        } else { // 현재 기기의 SDK 버전이 23미만이면
-            hour_24 = timePicker.getCurrentHour();
-            minute = timePicker.getCurrentMinute();
-        }
+        int hour_24 = hour;
+        int minute = minutes;
 
         // 현재 지정된 시간으로 알람 시간 설정
         Calendar calendar = Calendar.getInstance();

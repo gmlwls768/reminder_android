@@ -81,9 +81,6 @@ public class CompleteActivity extends AppCompatActivity {
 
         TimePicker timePicker = (TimePicker) findViewById(R.id.timePicker); //타임피커 연결
 
-        Button button = (Button) findViewById(R.id.button); //버튼 연결
-        button.setOnClickListener(new btnClickListener(this, timePicker));
-
         todoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
