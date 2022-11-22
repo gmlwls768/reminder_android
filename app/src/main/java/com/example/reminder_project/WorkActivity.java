@@ -39,8 +39,6 @@ public class WorkActivity extends AppCompatActivity {
     public static final int FIELD_NAME_IS_COMPLETE = 6;
     public static final int FIELD_NAME_ON_COMPLETE = 7;
 
-//    AlarmManager alarmManager;
-//    PendingIntent pendingIntent;
 
     int y = 0, m = 0, d = 0, h = 0, mi = 0; // 사용자가 설정한 시간
     ToDoTable todo; //A helper class to manage database creation and version management.
@@ -145,7 +143,9 @@ public class WorkActivity extends AppCompatActivity {
         chkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                timeText.setText("Date: " +y + "." + m + "." + d + "\n" + "Time: " + h + ":" + mi);
+                timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
+                btnClickListener bc = new btnClickListener(getApplicationContext(), h, mi);
+                bc.onClick(view);
             }
         });
 
