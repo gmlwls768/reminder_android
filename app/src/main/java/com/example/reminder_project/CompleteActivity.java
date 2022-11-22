@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 public class CompleteActivity extends AppCompatActivity {
@@ -77,6 +78,11 @@ public class CompleteActivity extends AppCompatActivity {
             listLayoutParent.addView(listItemBox); //자식 위젯 설절
         }
         cursor.close();
+
+        TimePicker timePicker = (TimePicker) findViewById(R.id.timePicker); //타임피커 연결
+
+        Button button = (Button) findViewById(R.id.button); //버튼 연결
+        button.setOnClickListener(new btnClickListener(this, timePicker));
 
         todoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
