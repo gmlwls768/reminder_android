@@ -56,7 +56,7 @@ public class AlarmNotification extends BroadcastReceiver {
         if (notificationManager != null) {
             // 노티피케이션 동작시킴
             // System.currentTimeMills()를 이용, 현재 시간을 받아와 대입하여 그때그때 id값을 다르게 지정
-            notificationManager.notify(Math.round(10000000), builder.build());
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         }
     }
 }

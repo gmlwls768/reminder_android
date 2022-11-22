@@ -54,15 +54,12 @@ public class WorkActivity extends AppCompatActivity {
     String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm"));
     String timeNow [] = formatedNow.split("/");
 
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
-//        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-//        final Calendar calendar = Calendar.getInstance();
 
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -118,9 +115,6 @@ public class WorkActivity extends AppCompatActivity {
                 mi = Integer.parseInt(userAlertTime[4]);
                 timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
 
-//                calendar.set(y,m,d,h,mi);
-//                alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
-//                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),AlarmManager.INTERVAL_HOUR,pendingIntent);
             }
 
             if(cursor.getString(FIELD_NAME_LOCATION) != null){ //장소 설정
@@ -144,7 +138,7 @@ public class WorkActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
-                btnClickListener bc = new btnClickListener(getApplicationContext(), h, mi);
+                btnClickListener bc = new btnClickListener(getApplicationContext(),y,m,d, h, mi);
                 bc.onClick(view);
             }
         });
@@ -218,7 +212,7 @@ public class WorkActivity extends AppCompatActivity {
                 d = dayOfMonth;
 
             }
-        },Integer.parseInt(timeNow[0]),Integer.parseInt(timeNow[1]),Integer.parseInt(timeNow[2]));
+        },Integer.parseInt(timeNow[0]),Integer.parseInt(timeNow[1]) -1,Integer.parseInt(timeNow[2]));
         datePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         datePickerDialog.setMessage("날짜를 선택하시오");
         datePickerDialog.show();
