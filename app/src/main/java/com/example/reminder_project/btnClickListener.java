@@ -40,7 +40,6 @@ public class btnClickListener implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         Calendar calendar = setTime(); //설정된 시간을 가져옴
-        System.out.println(calendar.toString());
         Intent alarmIntent = new Intent(context, AlarmNotification.class);
         alarmIntent.putExtra("alarmTitle", alarmTitle);
         alarmIntent.putExtra("alarmSummary", alarmSummary);
