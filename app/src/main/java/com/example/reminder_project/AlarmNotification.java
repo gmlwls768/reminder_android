@@ -10,10 +10,17 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 
+import java.util.Random;
+
 public class AlarmNotification extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String alarmTitle = intent.getStringExtra("alarmTitle");
+        String alarmSummary = intent.getStringExtra("alarmSummary");
+        Random random = new Random();
+        int m = random.nextInt(9999 - 1000) + 1000;
+
         //사용자에게 일어나는 이벤트를 알리는 클래스. 이것이 사용자에게 백그라운드에서 무슨 일이 일어났다고 알려주는 방법입니다.
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -22,7 +29,7 @@ public class AlarmNotification extends BroadcastReceiver {
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //특정시점에 notificationIntent(MainActivity)을 실행함
-        PendingIntent pendingI = PendingIntent.getActivity(context,0, notificationIntent, FLAG_IMMUTABLE);
+        PendingIntent pendingI = PendingIntent.getActivity(context,(int)(System.currentTimeMillis()/1000), notificationIntent, FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "default");
 
@@ -48,15 +55,15 @@ public class AlarmNotification extends BroadcastReceiver {
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setWhen(System.currentTimeMillis())
                 .setTicker("{Time to watch some cool stuff!}")
-                .setContentTitle("상태바에 보이는 타이틀")
-                .setContentText("상태바에 보이는 서브타이틀")
+                .setContentTitle(alarmTitle)
+                .setContentText(alarmSummary)
                 .setContentInfo("INFO")
                 .setContentIntent(pendingI);// 알림 클릭 시 설정한 Activity로 이동
 
         if (notificationManager != null) {
             // 노티피케이션 동작시킴
             // System.currentTimeMills()를 이용, 현재 시간을 받아와 대입하여 그때그때 id값을 다르게 지정
-            notificationManager.notify(Math.round(10000000), builder.build());
+            notificationManager.notify((int)(System.currentTimeMillis()/1000), builder.build());
         }
     }
 }

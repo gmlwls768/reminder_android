@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.view.View;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -18,29 +17,43 @@ import java.util.Locale;
 
 public class btnClickListener implements View.OnClickListener {
     private Context context; // Activity Context(?)
+    private int year;
+    private int month;
+    private  int day;
     private int hour;
     private int minutes;
+    private String alarmTitle, alarmSummary;
 
-    public btnClickListener(Context context, int hour, int minutes) {
+
+    public btnClickListener(Context context,int year, int month, int day, int hour, int minutes , String alarmTitle, String alarmSummary) {
         this.context = context;
+        this.year = year;
+        this.month = month;
+        this.day = day;
         this.hour = hour;
         this.minutes = minutes;
+        this.alarmTitle = alarmTitle;
+        this.alarmSummary = alarmSummary;
 
     }
 
     @Override
     public void onClick(View v) {
         Calendar calendar = setTime(); //설정된 시간을 가져옴
+        System.out.println(calendar.toString());
         Intent alarmIntent = new Intent(context, AlarmNotification.class);
+        alarmIntent.putExtra("alarmTitle", alarmTitle);
+        alarmIntent.putExtra("alarmSummary", alarmSummary);
+
         // PendingIntent 는, 가지고 있는 Intent 를 당장 수행하진 않고 특정 시점에 수행하도록 하는 특징을 갖고 있다
         // 특정시점에 alarmIntent(AlarmNotification)가 실행 됨
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int)(System.currentTimeMillis()/1000), alarmIntent, FLAG_IMMUTABLE);
         // 특정시점 설정
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         if (alarmManager != null) {
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                    AlarmManager.INTERVAL_DAY, pendingIntent); //지정된 시간에 휴대폰 화면을 깨우고 매일 반복하여 알림을 보여줌
+            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY, pendingIntent); //지정된 시간에 휴대폰 화면을 깨우고 매일 반복하여 알림을 보여줌
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Android Marshmallow 이상에서만 실행되는 코드
                 // 사용자가 전원을 충전하지 않고 화면이 꺼진 채로 기기를 일정 기간 정지 상태로 두면 기기는 Doze 모드를 시작하게 됩니다.
@@ -51,12 +64,19 @@ public class btnClickListener implements View.OnClickListener {
     }
 
     public Calendar setTime() { //날짜 설정 및 Toast 메시지 출력 후 Calender 객체 반환
+        int YEAR = year;
+        int MONTH = month -1;
+        int DAY = day;
+
         int hour_24 = hour;
         int minute = minutes;
 
         // 현재 지정된 시간으로 알람 시간 설정
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.YEAR,YEAR);
+        calendar.set(Calendar.MONTH, MONTH);
+        calendar.set(Calendar.DAY_OF_MONTH,DAY);
         calendar.set(Calendar.HOUR_OF_DAY, hour_24);
         calendar.set(Calendar.MINUTE, minute);
         calendar.set(Calendar.SECOND, 0);
