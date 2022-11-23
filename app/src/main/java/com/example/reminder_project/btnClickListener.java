@@ -23,6 +23,7 @@ public class btnClickListener implements View.OnClickListener {
     private int hour;
     private int minutes;
     private String alarmTitle, alarmSummary;
+    private  int setAlarmTime;
 
 
     public btnClickListener(Context context,int year, int month, int day, int hour, int minutes , String alarmTitle, String alarmSummary) {
@@ -34,6 +35,10 @@ public class btnClickListener implements View.OnClickListener {
         this.minutes = minutes;
         this.alarmTitle = alarmTitle;
         this.alarmSummary = alarmSummary;
+        String tempYear = Integer.toString(year);
+        tempYear = tempYear.substring(2);
+        String Temp = Integer.toString(month) + tempYear + Integer.toString(day) + Integer.toString(hour) + Integer.toString(minutes);
+        this.setAlarmTime = Integer.parseInt(Temp);
 
     }
 
@@ -43,10 +48,10 @@ public class btnClickListener implements View.OnClickListener {
         Intent alarmIntent = new Intent(context, AlarmNotification.class);
         alarmIntent.putExtra("alarmTitle", alarmTitle);
         alarmIntent.putExtra("alarmSummary", alarmSummary);
-
+        alarmIntent.putExtra("setAlarmTime",setAlarmTime);
         // PendingIntent 는, 가지고 있는 Intent 를 당장 수행하진 않고 특정 시점에 수행하도록 하는 특징을 갖고 있다
         // 특정시점에 alarmIntent(AlarmNotification)가 실행 됨
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int)(System.currentTimeMillis()/1000), alarmIntent, FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, setAlarmTime, alarmIntent, FLAG_IMMUTABLE);
         // 특정시점 설정
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
@@ -87,7 +92,7 @@ public class btnClickListener implements View.OnClickListener {
 
         //설정한 날짜를 Toast메시지로 보여줌
         Date currentDateTime = calendar.getTime();
-        String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE요일 a hh시 mm분 ", Locale.getDefault()).format(currentDateTime);
+        String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE a hh시 mm분 ", Locale.getDefault()).format(currentDateTime);
         Toast.makeText(context, date + "으로 알림이 설정되었습니다!", Toast.LENGTH_SHORT).show();
 
         return calendar;
