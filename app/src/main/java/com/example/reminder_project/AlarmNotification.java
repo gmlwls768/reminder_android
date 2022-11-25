@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
-import java.util.Random;
 
 public class AlarmNotification extends BroadcastReceiver {
     //Database Filed

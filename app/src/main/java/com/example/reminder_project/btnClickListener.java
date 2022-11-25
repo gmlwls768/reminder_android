@@ -20,9 +20,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class btnClickListener implements View.OnClickListener {
-    public int NOTIFICATION_REMOVE = 0;
-    public int NOTIFICATION_CREATE = 1;
-
     private Context context; // Activity Context(?)
     private int year;
     private int month;
@@ -70,7 +67,6 @@ public class btnClickListener implements View.OnClickListener {
         }
     }
 
-
     public Calendar setTime() { //날짜 설정 및 Toast 메시지 출력 후 Calender 객체 반환
         int YEAR = year;
         int MONTH = month - 1;
@@ -96,7 +92,7 @@ public class btnClickListener implements View.OnClickListener {
 
         //설정한 날짜를 Toast메시지로 보여줌
         Date currentDateTime = calendar.getTime();
-        String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE요일 a hh시 mm분 ", Locale.getDefault()).format(currentDateTime);
+        String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE a hh시 mm분 ", Locale.getDefault()).format(currentDateTime);
         Toast.makeText(context, date + "으로 알림이 설정되었습니다!", Toast.LENGTH_SHORT).show();
 
         return calendar;
