@@ -15,19 +15,12 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
 
 public class AlarmNotification extends BroadcastReceiver {
-    //Database Filed
-    public static final int FIELD_NAME_ID = 0;
-    public static final int FIELD_NAME_TITLE = 1;
-    public static final int FIELD_NAME_CONTENTS = 2;
-    public static final int FIELD_NAME_PRIORITY = 3;
-    public static final int FIELD_NAME_LOCATION = 4;
-    public static final int FIELD_NAME_ALERT = 5;
-    public static final int FIELD_NAME_ON_CREATE = 6;
-    public static final int FIELD_NAME_IS_COMPLETE = 7;
-    public static final int FIELD_NAME_ON_COMPLETE = 8;
-
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
     Cursor cursor;
@@ -81,11 +74,14 @@ public class AlarmNotification extends BroadcastReceiver {
         if (notificationManager != null) {
             todo = new ToDoTable(context);
             sqlDB = todo.getReadableDatabase(); //Create and/or open a database
-            cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ID =" + s_dbRowId + ";", null); //id에 해당하는 컬럼의 값을 가져옴
+            cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ON_CREATE='" + s_dbRowId + "';", null); //id에 해당하는 컬럼의 값을 가져옴
             cursor.moveToFirst(); //커서를 첫번째로 이동
-            System.out.println("reminder " + cursor.getString(FIELD_NAME_ALERT));
+            System.out.println("reminder " + cursor.getString(ToDoTable.FIELD_NAME_ALERT));
+            LocalDateTime now = LocalDateTime.now();
+            String formatNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm")); //현재날짜 설정
 
-            if (cursor.getString(FIELD_NAME_ALERT).equals("0000/00/00/00/00")) {
+            //알림 취소되었거나 알림이 수정되었다면
+            if (cursor.getString(ToDoTable.FIELD_NAME_ALERT).equals("0000/00/00/00/00") || !cursor.getString(ToDoTable.FIELD_NAME_ALERT).equals(formatNow)) {
                 System.out.println("reminder notification 작동안함");
             } else {
                 // 노티피케이션 동작시킴

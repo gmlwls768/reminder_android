@@ -5,7 +5,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
-import android.app.NotificationManager;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -30,18 +29,8 @@ import java.time.format.DateTimeFormatter;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class WorkActivity extends AppCompatActivity {
-    //Database Filed
-    public static final int FIELD_NAME_ID = 0;
-    public static final int FIELD_NAME_TITLE = 1;
-    public static final int FIELD_NAME_CONTENTS = 2;
-    public static final int FIELD_NAME_PRIORITY = 3;
-    public static final int FIELD_NAME_LOCATION = 4;
-    public static final int FIELD_NAME_ALERT = 5;
-    public static final int FIELD_NAME_ON_CREATE = 6;
-    public static final int FIELD_NAME_IS_COMPLETE = 7;
-    public static final int FIELD_NAME_ON_COMPLETE = 8;
-
     int y = 0, m = 0, d = 0, h = 0, mi = 0; // 사용자가 설정한 시간
+    boolean isModifyActivity;
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
     Cursor cursor;
@@ -52,18 +41,14 @@ public class WorkActivity extends AppCompatActivity {
     EditText placeInfo, title, content;
     TextView timeText;
     LocalDateTime now= LocalDateTime.now();
-    String formatedNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm"));
-    String timeNow [] = formatedNow.split("/");
-    Button alarmCancelBtn;
+    String formatNow;
+    String [] timeNow;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
-
-
-
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
         todo = new ToDoTable(this);
@@ -79,20 +64,25 @@ public class WorkActivity extends AppCompatActivity {
         timeBtn = (ImageButton) findViewById(R.id.timeBtn);
         chkBtn = (ImageButton) findViewById(R.id.chkBtn);
         timeText = (TextView) findViewById(R.id.timeText);
-        alarmCancelBtn = (Button) findViewById(R.id.alarmCancelBtn);
+        formatNow = now.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm"));
+        timeNow = formatNow.split("/");
 
         Intent intent = getIntent(); //액티비티간에 인수와 리턴값을 전달
-        int id = intent.getIntExtra("id", -1); //toDoList의 id 컬럼 값
-        if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
+        String id = intent.getStringExtra("id"); //toDoList의 id 컬럼 값
+        if(id == null) isModifyActivity = false;
+        else isModifyActivity = true;
+
+
+        if (isModifyActivity) {
             sqlDB = todo.getReadableDatabase(); //Create and/or open a database
-            cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ID =" + Integer.toString(id) + ";", null); //id에 해당하는 컬럼의 값을 가져옴
+            cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ON_CREATE ='" + id + "';", null); //id에 해당하는 컬럼의 값을 가져옴
             cursor.moveToFirst(); //커서를 첫번째로 이동
             String result = "";
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < 8; i++) {
                 result += cursor.getString(i) + " ";
             }
             System.out.println(result);
-            int userPriority = Integer.parseInt(cursor.getString(FIELD_NAME_PRIORITY));
+            int userPriority = Integer.parseInt(cursor.getString(ToDoTable.FIELD_NAME_PRIORITY));
             switch (userPriority){ //우선순위 설정
                 case 0:
                     priorityGroup.check(R.id.nonePriority);
@@ -108,14 +98,14 @@ public class WorkActivity extends AppCompatActivity {
                     break;
             }
 
-            title.setText(cursor.getString(FIELD_NAME_TITLE)); //타이틀 설정
+            title.setText(cursor.getString(ToDoTable.FIELD_NAME_TITLE)); //타이틀 설정
 
-            if(cursor.getString(FIELD_NAME_CONTENTS) != null){ //할일 내용 설절
-                content.setText(cursor.getString(FIELD_NAME_CONTENTS));
+            if(cursor.getString(ToDoTable.FIELD_NAME_CONTENTS) != null){ //할일 내용 설절
+                content.setText(cursor.getString(ToDoTable.FIELD_NAME_CONTENTS));
             }
 
-            if(cursor.getString(FIELD_NAME_ON_CREATE) != null){ //알림시간 설정
-                String userAlertTime [] = cursor.getString(FIELD_NAME_ON_CREATE).split("/");
+            if(cursor.getString(ToDoTable.FIELD_NAME_ALERT) != null){ //알림시간 설정
+                String userAlertTime [] = cursor.getString(ToDoTable.FIELD_NAME_ALERT).split("/");
                 y = Integer.parseInt(userAlertTime[0]);
                 m = Integer.parseInt(userAlertTime[1]);
                 d = Integer.parseInt(userAlertTime[2]);
@@ -125,11 +115,9 @@ public class WorkActivity extends AppCompatActivity {
 
             }
 
-            if(cursor.getString(FIELD_NAME_LOCATION) != null){ //장소 설정
-
-                placeInfo.setText(cursor.getString(FIELD_NAME_LOCATION));
+            if(cursor.getString(ToDoTable.FIELD_NAME_LOCATION) != null){ //장소 설정
+                placeInfo.setText(cursor.getString(ToDoTable.FIELD_NAME_LOCATION));
             }
-
         }
 
 
@@ -145,32 +133,12 @@ public class WorkActivity extends AppCompatActivity {
         chkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String alarmTitle = title.getText().toString();
-                String alarmSummary = content.getText().toString();
                 timeText.setText(y + "." + m + "." + d + "\n" + h + ":" + mi);
-                String s_id = Integer.toString(id);
-//                String tempY = Integer.toString(y);
-//                String NotificationID = Integer.toString(h) + Integer.toString(m) + Integer.toString(d) + tempY.substring(2) + Integer.toString(mi);
-                btnClickListener bc = new btnClickListener(getApplicationContext(),y,m,d, h, mi, alarmTitle, alarmSummary, s_id);
-                bc.onClick(view);
             }
         });
-
-        //취소버튼 클릭 시 DB 내 알림시간을 0000/00/00/00/00으로 업데이트
-        alarmCancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sqlDB = todo.getWritableDatabase();
-                ContentValues cv = new ContentValues();
-                cv.put("ALERT", "0000/00/00/00/00");
-                sqlDB.update("toDo", cv, "id=" + id, null);
-                System.out.println("업데이트 완료");
-            }
-        });
-
-
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
+            String formatNow = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             @Override
             public void onClick(View view) {
                 String myTitle = title.getText().toString();
@@ -198,22 +166,28 @@ public class WorkActivity extends AppCompatActivity {
                 cv.put("PRIORITY", myPriority);
                 cv.put("LOCATION", myLocation);
 
-                if(y != 0){ //날짜가 지정되지 않은 경우
-                    String myAlert = Integer.toString(y) + "/" + Integer.toString(m) + "/" + Integer.toString(d) + "/" + Integer.toString(h) + "/" + Integer.toString(mi);
-                    cv.put("ALERT", myAlert);
-                    if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
-                        sqlDB.update("toDo", cv, "id=" + id, null);
+                if(y == 0){ //날짜가 지정되지 않은 경우
+                    if (isModifyActivity) { //id 컬럼 값이 있을 경우(수정 페이지)
+                        sqlDB.update("toDo", cv, "ON_CREATE='" + id + "'", null);
                     }else{
-                        cv.put("ON_CREATE", formatedNow);
+                        cv.put("ON_CREATE", formatNow);
                         sqlDB.insert("toDo", null, cv);
                     }
 
-                }else {
-                    if (id != -1) { //id 컬럼 값이 있을 경우(수정 페이지)
-                        sqlDB.update("toDo", cv, "id=" + id, null);
+                }else{
+                    String alarmTitle = title.getText().toString();
+                    String alarmSummary = content.getText().toString();
+                    String myAlert = Integer.toString(y) + "/" + Integer.toString(m) + "/" + Integer.toString(d) + "/" + Integer.toString(h) + "/" + Integer.toString(mi);
+                    cv.put("ALERT", myAlert);
+                    if (isModifyActivity) { //id 컬럼 값이 있을 경우(수정 페이지)
+                        sqlDB.update("toDo", cv, "ON_CREATE='" + id + "'", null);
+                        btnClickListener bc = new btnClickListener(getApplicationContext(),y,m,d, h, mi, alarmTitle, alarmSummary, id);
+                        bc.onClick(view);
                     }else{
-                        cv.put("ON_CREATE", formatedNow);
+                        cv.put("ON_CREATE", formatNow);
                         sqlDB.insert("toDo", null, cv);
+                        btnClickListener bc = new btnClickListener(getApplicationContext(),y,m,d, h, mi, alarmTitle, alarmSummary, formatNow);
+                        bc.onClick(view);
                     }
                 }
                 sqlDB.close();
@@ -222,7 +196,6 @@ public class WorkActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
-
             }
         });
     }

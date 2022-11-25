@@ -17,16 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class CompleteActivity extends AppCompatActivity {
-    public static final int FIELD_NAME_ID = 0;
-    public static final int FIELD_NAME_TITLE = 1;
-    public static final int FIELD_NAME_CONTENTS = 2;
-    public static final int FIELD_NAME_PRIORITY = 3;
-    public static final int FIELD_NAME_LOCATION = 4;
-    public static final int FIELD_NAME_ALERT = 5;
-    public static final int FIELD_NAME_ON_CREATE = 6;
-    public static final int FIELD_NAME_IS_COMPLETE = 7;
-    public static final int FIELD_NAME_ON_COMPLETE = 8;
-
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
     Cursor cursor;
@@ -58,17 +48,17 @@ public class CompleteActivity extends AppCompatActivity {
             listItemBox.setLayoutParams(p); //너비, 높이 설정
             listItemBox.setOrientation(LinearLayout.HORIZONTAL); // 수평 정렬
 
-            int listId = Integer.parseInt(cursor.getString(FIELD_NAME_ID));
+            String listId = cursor.getString(ToDoTable.FIELD_NAME_ON_CREATE);
             CheckBox cb = new CheckBox(getApplicationContext()); // listItemBox 내 사용될 CheckBox
             cb.setLayoutParams(w);
 
             TextView tv= new TextView(getApplicationContext()); // listItemBox 내 사용될 TextView
             tv.setLayoutParams(w);
-            tv.setText(cursor.getString(FIELD_NAME_TITLE)); // View의 텍스트 값을 toDoTable의 TITLE 컬럼의 값으로 설정
+            tv.setText(cursor.getString(ToDoTable.FIELD_NAME_TITLE)); // View의 텍스트 값을 toDoTable의 TITLE 컬럼의 값으로 설정
 
             TextView tvPriority= new TextView(getApplicationContext()); // listItemBox 내 사용될 TextView
             tvPriority.setLayoutParams(w);
-            int tempPriority = Integer.parseInt(cursor.getString(FIELD_NAME_PRIORITY));
+            int tempPriority = Integer.parseInt(cursor.getString(ToDoTable.FIELD_NAME_PRIORITY));
             String tempPriorityText = "";
             if(tempPriority>=1) {
                 for (int i = 0; i < tempPriority; i++) {
@@ -78,15 +68,10 @@ public class CompleteActivity extends AppCompatActivity {
             tvPriority.setText(tempPriorityText);
             tvPriority.setTextColor(Color.RED);
 
-            TextView dbIdView= new TextView(getApplicationContext()); //listItemBox 내 사용될 TextView
-            dbIdView.setLayoutParams(w);
-            dbIdView.setVisibility(View.GONE);
-            dbIdView.setText(cursor.getString(FIELD_NAME_ID)); // View의 텍스트 값을 toDoTable의 ID 컬럼의 값으로 설정
-
             cb.setOnClickListener(new View.OnClickListener() { // 클릭 시 해당 목록이 완료된 항목으로 이동
                 @Override
                 public void onClick(View view) {
-                    sqlDB.execSQL("DELETE FROM toDo WHERE ID = " + listId + ";");
+                    sqlDB.execSQL("DELETE FROM toDo WHERE ON_CREATE='" + listId + "';");
                     finish();//인텐트 종료
                     overridePendingTransition(0, 0);//인텐트 효과 없애기
                     intent = getIntent(); //인텐트
