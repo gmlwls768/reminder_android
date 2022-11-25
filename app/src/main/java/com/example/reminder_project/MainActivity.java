@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -37,9 +38,10 @@ public class MainActivity extends AppCompatActivity {
     public static final int FIELD_NAME_CONTENTS = 2;
     public static final int FIELD_NAME_PRIORITY = 3;
     public static final int FIELD_NAME_LOCATION = 4;
-    public static final int FIELD_NAME_ON_CREATE = 5;
-    public static final int FIELD_NAME_IS_COMPLETE = 6;
-    public static final int FIELD_NAME_ON_COMPLETED = 7;
+    public static final int FIELD_NAME_ALERT = 5;
+    public static final int FIELD_NAME_ON_CREATE = 6;
+    public static final int FIELD_NAME_IS_COMPLETE = 7;
+    public static final int FIELD_NAME_ON_COMPLETE = 8;
 
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     LinkedList<LinearLayout> lowPriorityList;
     LinkedList<LinearLayout> nonePriorityList;
     Iterator<LinearLayout> ir;
+    NotificationManager nm;
 
 //    GoogleMap mmap;
 
@@ -77,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
         mediumPriorityList = new LinkedList<>(); // 중간 우선순위 목록
         lowPriorityList = new LinkedList<>(); // 낮은 우선순위 목록
         nonePriorityList = new LinkedList<>(); //우선순위 없은 목록
+        Button alarmCancelBtn = (Button) findViewById(R.id.alarmCancelBtn);
+        nm = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
 
         while (cursor.moveToNext()) {
             LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT); //너비, 높이 설정 단축어
@@ -220,6 +225,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) { // 입력이 끝났을 때 조치
 
+            }
+        });
+
+        alarmCancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nm.cancel(1);
             }
         });
 

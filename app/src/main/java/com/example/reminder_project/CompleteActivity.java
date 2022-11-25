@@ -23,9 +23,10 @@ public class CompleteActivity extends AppCompatActivity {
     public static final int FIELD_NAME_CONTENTS = 2;
     public static final int FIELD_NAME_PRIORITY = 3;
     public static final int FIELD_NAME_LOCATION = 4;
-    public static final int FIELD_NAME_ON_CREATE = 5;
-    public static final int FIELD_NAME_IS_COMPLETE = 6;
-    public static final int FIELD_NAME_ID_ON_COMPLETED = 7;
+    public static final int FIELD_NAME_ALERT = 5;
+    public static final int FIELD_NAME_ON_CREATE = 6;
+    public static final int FIELD_NAME_IS_COMPLETE = 7;
+    public static final int FIELD_NAME_ON_COMPLETE = 8;
 
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;

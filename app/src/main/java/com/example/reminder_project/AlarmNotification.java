@@ -1,6 +1,7 @@
 package com.example.reminder_project;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,28 +9,45 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
+
 import androidx.core.app.NotificationCompat;
 
 import java.util.Random;
 
 public class AlarmNotification extends BroadcastReceiver {
+    //Database Filed
+    public static final int FIELD_NAME_ID = 0;
+    public static final int FIELD_NAME_TITLE = 1;
+    public static final int FIELD_NAME_CONTENTS = 2;
+    public static final int FIELD_NAME_PRIORITY = 3;
+    public static final int FIELD_NAME_LOCATION = 4;
+    public static final int FIELD_NAME_ALERT = 5;
+    public static final int FIELD_NAME_ON_CREATE = 6;
+    public static final int FIELD_NAME_IS_COMPLETE = 7;
+    public static final int FIELD_NAME_ON_COMPLETE = 8;
+
+    ToDoTable todo; //A helper class to manage database creation and version management.
+    SQLiteDatabase sqlDB;
+    Cursor cursor;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String alarmTitle = intent.getStringExtra("alarmTitle");
         String alarmSummary = intent.getStringExtra("alarmSummary");
-        Random random = new Random();
-        int m = random.nextInt(9999 - 1000) + 1000;
+        String s_dbRowId = intent.getStringExtra("dbRowId");
+        System.out.println("reminder dbRowId: " + s_dbRowId);
 
         //사용자에게 일어나는 이벤트를 알리는 클래스. 이것이 사용자에게 백그라운드에서 무슨 일이 일어났다고 알려주는 방법입니다.
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(context, MainActivity.class);
-
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //특정시점에 notificationIntent(MainActivity)을 실행함
-        PendingIntent pendingI = PendingIntent.getActivity(context,(int)(System.currentTimeMillis()/1000), notificationIntent, FLAG_IMMUTABLE);
+        PendingIntent pendingI = PendingIntent.getActivity(context, 1, notificationIntent, FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "default");
 
@@ -38,7 +56,7 @@ public class AlarmNotification extends BroadcastReceiver {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             builder.setSmallIcon(R.drawable.ic_launcher_foreground); //mipmap 사용시 Oreo 이상에서 시스템 UI 에러남
 
-            String channelName ="알림 채널";
+            String channelName = "알림 채널";
             String description = "특정 시간에 알림합니다.";
             int importance = NotificationManager.IMPORTANCE_HIGH; //소리와 알림메시지를 같이 보여줌
 
@@ -49,7 +67,8 @@ public class AlarmNotification extends BroadcastReceiver {
                 // 노티피케이션 채널을 시스템에 등록
                 notificationManager.createNotificationChannel(channel);
             }
-        }else builder.setSmallIcon(R.mipmap.ic_launcher); // Oreo 이하에서 mipmap 사용하지 않으면 Couldn't create icon: StatusBarIcon 에러남
+        } else
+            builder.setSmallIcon(R.mipmap.ic_launcher); // Oreo 이하에서 mipmap 사용하지 않으면 Couldn't create icon: StatusBarIcon 에러남
 
         builder.setAutoCancel(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -61,9 +80,20 @@ public class AlarmNotification extends BroadcastReceiver {
                 .setContentIntent(pendingI);// 알림 클릭 시 설정한 Activity로 이동
 
         if (notificationManager != null) {
-            // 노티피케이션 동작시킴
-            // System.currentTimeMills()를 이용, 현재 시간을 받아와 대입하여 그때그때 id값을 다르게 지정
-            notificationManager.notify((int)(System.currentTimeMillis()/1000), builder.build());
+            todo = new ToDoTable(context);
+            sqlDB = todo.getReadableDatabase(); //Create and/or open a database
+            cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ID =" + s_dbRowId + ";", null); //id에 해당하는 컬럼의 값을 가져옴
+            cursor.moveToFirst(); //커서를 첫번째로 이동
+            System.out.println("reminder " + cursor.getString(FIELD_NAME_ALERT));
+
+            if (cursor.getString(FIELD_NAME_ALERT).equals("0000/00/00/00/00")) {
+                System.out.println("reminder notification 작동안함");
+            } else {
+                // 노티피케이션 동작시킴
+                // System.currentTimeMills()를 이용, 현재 시간을 받아와 대입하여 그때그때 id값을 다르게 지정
+                System.out.println("reminder notification 작동");
+                notificationManager.notify(1, builder.build());
+            }
         }
     }
 }
