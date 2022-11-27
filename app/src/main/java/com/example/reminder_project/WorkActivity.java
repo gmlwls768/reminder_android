@@ -48,7 +48,7 @@ public class WorkActivity extends AppCompatActivity {
     EditText placeEdtTxt, titleEdtTxt, contentEdtTxt;
     RadioGroup priorityGroup;
     RadioButton highPriorityBtn, mediumPriorityBtn, lowPriorityBtn, nonePriorityBtn;
-    ImageButton alarmSetBtn, alarmReflectBtn;
+    ImageButton alarmSetBtn;
     TextView AlarmTimeView;
     Button saveBtn;
 
@@ -74,7 +74,6 @@ public class WorkActivity extends AppCompatActivity {
         nonePriorityBtn = (RadioButton) findViewById(R.id.nonePriorityBtn);
 
         alarmSetBtn = (ImageButton) findViewById(R.id.alarmSetBtn);
-        alarmReflectBtn = (ImageButton) findViewById(R.id.alarmReflectBtn);
         AlarmTimeView = (TextView) findViewById(R.id.timeText);
         placeEdtTxt = (EditText) findViewById(R.id.placeEdtTxt);
         saveBtn = (Button) findViewById(R.id.saveBtn);
@@ -125,7 +124,7 @@ public class WorkActivity extends AppCompatActivity {
                 alarmDay = Integer.parseInt(alarmSetTime[2]);
                 alarmHour = Integer.parseInt(alarmSetTime[3]);
                 alarmMinute = Integer.parseInt(alarmSetTime[4]);
-                AlarmTimeView.setText(alarmYear + "." + alarmMonth + "." + alarmDay + "\n" + alarmHour + ":" + alarmMinute);
+                AlarmTimeView.setText(alarmYear + "년" + alarmMonth + "월" + alarmDay + "일" + alarmHour + "시" + alarmMinute + "분");
             }
 
             if(cursor.getString(ToDoTable.FIELD_NAME_LOCATION) != null){ //장소 설정
@@ -143,14 +142,6 @@ public class WorkActivity extends AppCompatActivity {
 
                 showTime(splitedNowTime[3], splitedNowTime[4]);
                 showDate(splitedNowTime[0], splitedNowTime[1], splitedNowTime[2]);
-            }
-        });
-
-        //알림시간 반영
-        alarmReflectBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlarmTimeView.setText(alarmYear + "." + alarmMonth + "." + alarmDay + "\n" + alarmHour + ":" + alarmMinute);
             }
         });
 
@@ -222,31 +213,31 @@ public class WorkActivity extends AppCompatActivity {
     }
 
     public void showDate(String sYear, String sMonth, String sDay) {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog_NoActionBar, new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog dialog = new DatePickerDialog(this, android.R.style.Theme_Holo_Light_Dialog_NoActionBar,new DatePickerDialog.OnDateSetListener()
+        {
             @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 alarmYear = year;
-                alarmMonth = month + 1;
+                alarmMonth = monthOfYear + 1;
                 alarmDay = dayOfMonth;
-
             }
         },Integer.parseInt(sYear),Integer.parseInt(sMonth) -1,Integer.parseInt(sDay));
-        datePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        datePickerDialog.setMessage("날짜를 선택하시오");
-        datePickerDialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setMessage("날짜를 선택하시오");
+        dialog.show();
     }
-
     public void showTime(String sHour, String sMinute) {
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog_NoActionBar, new TimePickerDialog.OnTimeSetListener() {
+        TimePickerDialog dialog = new TimePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog_NoActionBar, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 alarmHour = hourOfDay;
                 alarmMinute = minute;
+                AlarmTimeView.setText(alarmYear + "년" + alarmMonth + "월" + alarmDay + "일" + alarmHour + "시" + alarmMinute + "분");
             }
         }, Integer.parseInt(sHour), Integer.parseInt(sMinute), true);
-        timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        timePickerDialog.setMessage("시간을 선택하시오");
-        timePickerDialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setMessage("시간을 선택하시오");
+        dialog.show();
     }
 
     public Calendar setAlarmTime() { //날짜 설정 및 Toast 메시지 출력 후 Calender 객체 반환
@@ -262,7 +253,7 @@ public class WorkActivity extends AppCompatActivity {
         calendar.set(Calendar.MINUTE, MINUTE);
         calendar.set(Calendar.SECOND, 0);
 
-        //설정한 날짜를 Toast메시지로 보여줌
+        //설정한 날짜를 Toast 메시지로 보여줌
         Date currentDateTime = calendar.getTime();
         String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE a hh시 mm분", Locale.getDefault()).format(currentDateTime);
         Toast.makeText(getApplicationContext(), date + "으로 알림이 설정되었습니다!", Toast.LENGTH_SHORT).show();

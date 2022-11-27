@@ -65,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
         nonePriorityItem = new LinkedList<>(); //우선순위 없은 목록
 
         while (cursor.moveToNext()) {
-//            String result = "";
-//            for (int i = 0; i < 8; i++) {
-//                result += cursor.getString(i) + " ";
-//            }
-//            System.out.println("DB DATA: " + result);
+            String result = "";
+            for (int i = 0; i < 8; i++) {
+                result += cursor.getString(i) + " ";
+            }
+            System.out.println("DB DATA: " + result);
 
             String tableRowId = cursor.getString(ToDoTable.FIELD_NAME_ON_CREATE); //DB 개인키
 
