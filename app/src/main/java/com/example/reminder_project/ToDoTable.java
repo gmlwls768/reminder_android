@@ -9,7 +9,7 @@ public class ToDoTable extends SQLiteOpenHelper {
     public static final int FIELD_NAME_CONTENTS = 1;
     public static final int FIELD_NAME_PRIORITY = 2;
     public static final int FIELD_NAME_LOCATION = 3;
-    public static final int FIELD_NAME_ALERT = 4;
+    public static final int FIELD_NAME_ALARM = 4;
     public static final int FIELD_NAME_ON_CREATE = 5;
     public static final int FIELD_NAME_IS_COMPLETE = 6;
     public static final int FIELD_NAME_ON_COMPLETE = 7;
@@ -20,7 +20,7 @@ public class ToDoTable extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE toDo(TITLE TEXT, CONTENTS TEXT,  PRIORITY INTEGER DEFAULT 0, LOCATION TEXT, ALERT TEXT, ON_CREATE TEXT PRIMARY KEY, IS_COMPLETE INTEGER DEFAULT 0, ON_COMPLETE TEXT);");
+        db.execSQL("CREATE TABLE toDo(TITLE TEXT, CONTENTS TEXT,  PRIORITY INTEGER DEFAULT 0, LOCATION TEXT, ALARM TEXT, ON_CREATE TEXT PRIMARY KEY, IS_COMPLETE INTEGER DEFAULT 0, ON_COMPLETE TEXT);");
     }
 
     @Override

@@ -13,16 +13,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="10"
         android:orientation="vertical">
-
         <EditText
-            android:id="@+id/title"
+            android:id="@+id/titleEdtTxt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:hint="제목을 입력하세요" />
-
         <EditText
-            android:id="@+id/content"
+            android:id="@+id/contentEdtTxt"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="내용을 입력하세요"
@@ -39,26 +37,24 @@
             android:layout_height="match_parent"
             android:text="알림 날짜 설정 " />
         <ImageButton
-            android:id="@+id/timeBtn"
+            android:id="@+id/alarmSetBtn"
             android:layout_width="50dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:layout_height="wrap_content"
             android:src="@drawable/time_icon" />
         <ImageButton
-            android:id="@+id/chkBtn"
+            android:id="@+id/alarmReflectBtn"
             android:layout_width="50dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:layout_height="wrap_content"
             android:src="@drawable/check_icon" />
-
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancel"
             android:id="@+id/alarmCancelBtn"></Button>
-
         <TextView
             android:id="@+id/timeText"
             android:gravity="center"
@@ -84,7 +80,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <RadioButton
-                android:id="@+id/highPriority"
+                android:id="@+id/highPriorityBtn"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -92,21 +88,21 @@
                 android:layout_margin="10dp"/>
 
             <RadioButton
-                android:id="@+id/mediumPriority"
+                android:id="@+id/mediumPriorityBtn"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="중간"
                 android:layout_margin="10dp"/>
             <RadioButton
-                android:id="@+id/lowPriority"
+                android:id="@+id/lowPriorityBtn"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="낮음"
                 android:layout_margin="10dp"/>
             <RadioButton
-                android:id="@+id/nonePriority"
+                android:id="@+id/nonePriorityBtn"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -126,12 +122,8 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="장소"/>
-        
-<!--        <fragment-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
         <EditText
-            android:id="@+id/placeInfo"
+            android:id="@+id/placeEdtTxt"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:hint="장소를 입력하세요"
