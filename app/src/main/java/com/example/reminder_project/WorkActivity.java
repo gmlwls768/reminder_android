@@ -50,7 +50,7 @@ public class WorkActivity extends AppCompatActivity {
     RadioButton highPriorityBtn, mediumPriorityBtn, lowPriorityBtn, nonePriorityBtn;
     ImageButton alarmSetBtn;
     TextView AlarmTimeView;
-    Button saveBtn;
+    Button placeSearchBtn, saveBtn;
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -76,6 +76,7 @@ public class WorkActivity extends AppCompatActivity {
         alarmSetBtn = (ImageButton) findViewById(R.id.alarmSetBtn);
         AlarmTimeView = (TextView) findViewById(R.id.timeText);
         placeEdtTxt = (EditText) findViewById(R.id.placeEdtTxt);
+        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
         saveBtn = (Button) findViewById(R.id.saveBtn);
 
         // 수정 or 추가 페이지 판별
@@ -142,6 +143,18 @@ public class WorkActivity extends AppCompatActivity {
 
                 showTime(splitedNowTime[3], splitedNowTime[4]);
                 showDate(splitedNowTime[0], splitedNowTime[1], splitedNowTime[2]);
+            }
+        });
+
+        //키워드를 통해 장소를 검색
+        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String placeName = placeEdtTxt.getText().toString();
+                Intent intent = new Intent(getApplicationContext(), PlaceSearchActivity.class);
+                intent.putExtra("placeName", placeName); //해당 목록의 개인키를 넘겨준다
+                startActivity(intent);
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
         });
 
