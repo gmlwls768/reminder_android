@@ -42,9 +42,13 @@ public class PlaceSearchActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView parent, View v, int position, long id){
-                Toast.makeText(getApplicationContext(),
-                        pAdapter.getItem(position).getName(),
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(getApplicationContext(),
+//                        pAdapter.getItem(position).getName(),
+//                        Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
+                intent.putExtra("placeName", pAdapter.getItem(position).getName());
+                startActivity(intent);
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
         });
 

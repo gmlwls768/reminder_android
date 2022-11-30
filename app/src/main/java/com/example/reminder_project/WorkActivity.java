@@ -2,6 +2,7 @@ package com.example.reminder_project;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -39,9 +41,20 @@ import java.util.Locale;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class WorkActivity extends AppCompatActivity {
+//    private static final String ITEM_TITLE = "ITEM_TITLE";
+//    private static final String ITEM_CONTENT = "ITEM_CONTENT";
+//    private static final String ITEM_PRIORITY = "ITEM_PRIORITY";
+//    private static final int ALARM_TIME [] = {0 , 0, 0, 0, 0};
+
+    private static String prevTitle, prevContent, prevTableRowId;
+    private static int prevPriority, prevAlarmYear, prevAlarmMonth, prevAlarmDay, prevAlarmHour, prevAlarmMinute;
+    private static boolean isReloadActivity;
+
+
     ToDoTable todo;
     SQLiteDatabase sqlDB;
     Cursor cursor;
+    String tableRowId;
     int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute; // 알림 시간
     boolean isModifyActivity; // 수정 or 추가 페이지 판별
 
@@ -79,13 +92,41 @@ public class WorkActivity extends AppCompatActivity {
         placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
         saveBtn = (Button) findViewById(R.id.saveBtn);
 
-        // 수정 or 추가 페이지 판별
         Intent intent = getIntent();
-        String tableRowId = intent.getStringExtra("id");
+        tableRowId = intent.getStringExtra("id");
         if(tableRowId == null) isModifyActivity = false;
         else isModifyActivity = true;
 
-        if (isModifyActivity) {
+
+        if(isReloadActivity){
+            String placeName = intent.getStringExtra("placeName");
+            if(placeName != null){
+                placeEdtTxt.setText(placeName);
+            }
+            tableRowId = prevTableRowId;
+            System.out.println("tableRowId: "+tableRowId);
+            titleEdtTxt.setText(prevTitle);
+            contentEdtTxt.setText(prevContent);
+
+            switch (prevPriority){ //우선순위 설정
+                case R.id.nonePriorityBtn:
+                    priorityGroup.check(R.id.nonePriorityBtn);
+                    break;
+                case R.id.lowPriorityBtn:
+                    priorityGroup.check(R.id.lowPriorityBtn);
+                    break;
+                case R.id.mediumPriorityBtn:
+                    priorityGroup.check(R.id.mediumPriorityBtn);
+                    break;
+                case R.id.highPriorityBtn:
+                    priorityGroup.check(R.id.highPriorityBtn);
+                    break;
+            }
+
+            alarmYear = prevAlarmYear; alarmMonth = prevAlarmMonth; alarmDay = prevAlarmDay; alarmHour = prevAlarmHour; alarmMinute = prevAlarmMinute;
+            AlarmTimeView.setText(alarmYear + "년" + alarmMonth + "월" + alarmDay + "일" + alarmHour + "시" + alarmMinute + "분");
+
+        }else if(isModifyActivity) { // 수정 or 추가 페이지 판별
             sqlDB = todo.getReadableDatabase(); //Create and/or open a database
             cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ON_CREATE ='" + tableRowId + "';", null); //id에 해당하는 컬럼의 값을 가져옴
             cursor.moveToFirst(); //커서를 첫번째로 이동
@@ -133,6 +174,8 @@ public class WorkActivity extends AppCompatActivity {
             }
         }
 
+        isReloadActivity = false;
+
         // 알림시간 설정
         alarmSetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,6 +198,27 @@ public class WorkActivity extends AppCompatActivity {
                 intent.putExtra("placeName", placeName); //해당 목록의 개인키를 넘겨준다
                 startActivity(intent);
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
+
+                isReloadActivity = true;
+                prevTableRowId = tableRowId;
+                prevTitle = titleEdtTxt.getText().toString();
+                prevContent = contentEdtTxt.getText().toString();
+                prevPriority = priorityGroup.getCheckedRadioButtonId();
+//                switch (priorityGroup.getCheckedRadioButtonId()){
+//                    case R.id.nonePriorityBtn:
+//                        prevPriority = 0;
+//                        break;
+//                    case R.id.lowPriorityBtn:
+//                        prevPriority = 1;
+//                        break;
+//                    case R.id.mediumPriorityBtn:
+//                        prevPriority = 2;
+//                        break;
+//                    case R.id.highPriorityBtn:
+//                        prevPriority = 3;
+//                        break;
+//                }
+                prevAlarmYear = alarmYear; prevAlarmMonth = alarmMonth; prevAlarmDay = alarmDay; prevAlarmHour = alarmHour; prevAlarmMinute = alarmMinute;
             }
         });
 
@@ -191,7 +255,7 @@ public class WorkActivity extends AppCompatActivity {
                 cv.put("LOCATION", myLocation);
 
                 if(alarmDay == 0){ //날짜가 지정되지 않은 경우
-                    if (isModifyActivity) {
+                    if (tableRowId != null) {
                         sqlDB.update("toDo", cv, "ON_CREATE='" + tableRowId + "'", null);
                     }else{
                         cv.put("ON_CREATE", formatNowTime);
@@ -206,7 +270,7 @@ public class WorkActivity extends AppCompatActivity {
                     String _alarm = new SimpleDateFormat("yyyy/MM/dd/HH/mm").format(alarmTime);
                     cv.put("ALARM", _alarm);
 
-                    if (isModifyActivity) {
+                    if (tableRowId != null) {
                         sqlDB.update("toDo", cv, "ON_CREATE='" + tableRowId + "'", null);
                         makeAlarm(alarmCalendar, alarmTitle, alarmSummary, tableRowId);
                     }else{
