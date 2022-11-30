@@ -52,10 +52,12 @@ public class WorkActivity extends AppCompatActivity {
     TextView AlarmTimeView;
     Button saveBtn;
 
+
     @SuppressLint("SetTextI18n")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -78,6 +80,7 @@ public class WorkActivity extends AppCompatActivity {
         placeEdtTxt = (EditText) findViewById(R.id.placeEdtTxt);
         saveBtn = (Button) findViewById(R.id.saveBtn);
 
+        Button moveGui = (Button) findViewById(R.id.moveGui);
         // 수정 or 추가 페이지 판별
         Intent intent = getIntent();
         String tableRowId = intent.getStringExtra("id");
@@ -208,6 +211,16 @@ public class WorkActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
+            }
+        });
+
+        moveGui.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
+
             }
         });
     }

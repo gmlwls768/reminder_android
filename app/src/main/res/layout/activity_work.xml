@@ -110,6 +110,12 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="장소"/>
+        <Button
+            android:id="@+id/moveGui"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="맵으로 이동"
+            android:textColor="#000000"/>
         <EditText
             android:id="@+id/placeEdtTxt"
             android:layout_width="wrap_content"
