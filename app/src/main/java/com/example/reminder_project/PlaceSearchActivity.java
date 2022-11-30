@@ -60,7 +60,9 @@ public class PlaceSearchActivity extends AppCompatActivity {
                 String name = object.getString("place_name");
                 String category = object.getString("category_group_name");
                 String address = object.getString("road_address_name");
-                items.add(new PlaceSearchItem(name, category, address));
+                String lat = object.getString("y");
+                String lng = object.getString("x");
+                items.add(new PlaceSearchItem(name, category, address, Double.parseDouble(lat), Double.parseDouble(lng)));
             }
         } catch (JSONException e) {
             e.printStackTrace();
