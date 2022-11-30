@@ -2,6 +2,9 @@ plugins {
     id 'com.android.application'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     namespace 'com.example.reminder_project'
     compileSdk 32
@@ -14,6 +17,8 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "KAKAO_REST_API_KEY", properties['kakao_rest_api_key']
+        buildConfigField "String", "KAKA0_NATIVE_APP_KEY", properties['kakao_native_app_key']
     }
 
     buildTypes {

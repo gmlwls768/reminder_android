@@ -50,7 +50,7 @@ public class WorkActivity extends AppCompatActivity {
     RadioButton highPriorityBtn, mediumPriorityBtn, lowPriorityBtn, nonePriorityBtn;
     ImageButton alarmSetBtn;
     TextView AlarmTimeView;
-    Button saveBtn;
+    Button placeSearchBtn, saveBtn;
 
 
     @SuppressLint("SetTextI18n")
@@ -78,6 +78,7 @@ public class WorkActivity extends AppCompatActivity {
         alarmSetBtn = (ImageButton) findViewById(R.id.alarmSetBtn);
         AlarmTimeView = (TextView) findViewById(R.id.timeText);
         placeEdtTxt = (EditText) findViewById(R.id.placeEdtTxt);
+        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
         saveBtn = (Button) findViewById(R.id.saveBtn);
 
         Button moveGui = (Button) findViewById(R.id.moveGui);
@@ -145,6 +146,18 @@ public class WorkActivity extends AppCompatActivity {
 
                 showTime(splitedNowTime[3], splitedNowTime[4]);
                 showDate(splitedNowTime[0], splitedNowTime[1], splitedNowTime[2]);
+            }
+        });
+
+        //키워드를 통해 장소를 검색
+        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String placeName = placeEdtTxt.getText().toString();
+                Intent intent = new Intent(getApplicationContext(), PlaceSearchActivity.class);
+                intent.putExtra("placeName", placeName); //해당 목록의 개인키를 넘겨준다
+                startActivity(intent);
+                overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
         });
 
@@ -225,6 +238,7 @@ public class WorkActivity extends AppCompatActivity {
         });
     }
 
+    // 사용자로부터 알림날짜를 입력 받음
     public void showDate(String sYear, String sMonth, String sDay) {
         DatePickerDialog dialog = new DatePickerDialog(this, android.R.style.Theme_Holo_Light_Dialog_NoActionBar,new DatePickerDialog.OnDateSetListener()
         {
@@ -239,6 +253,8 @@ public class WorkActivity extends AppCompatActivity {
         dialog.setMessage("날짜를 선택하시오");
         dialog.show();
     }
+
+    // 사용자로부터 알림시간을 입력 받음
     public void showTime(String sHour, String sMinute) {
         TimePickerDialog dialog = new TimePickerDialog(this,android.R.style.Theme_Holo_Light_Dialog_NoActionBar, new TimePickerDialog.OnTimeSetListener() {
             @Override
@@ -253,7 +269,8 @@ public class WorkActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public Calendar setAlarmTime() { //날짜 설정 및 Toast 메시지 출력 후 Calender 객체 반환
+    //날짜 설정 및 Toast 메시지 출력 후 Calender 객체 반환
+    public Calendar setAlarmTime() {
         int YEAR = alarmYear; int MONTH = alarmMonth - 1; int DAY = alarmDay; int HOUR = alarmHour; int MINUTE = alarmMinute;
 
         // 현재 지정된 시간으로 알람 시간 설정
@@ -273,6 +290,7 @@ public class WorkActivity extends AppCompatActivity {
         return calendar;
     }
 
+    // 알림 Notification 설정
     public void makeAlarm(Calendar alarmTime, String alarmTitle, String alarmSummary, String tableRowId){
         Intent alarmIntent = new Intent(getApplicationContext(), AlarmNotification.class);
         alarmIntent.putExtra("alarmTitle", alarmTitle);
@@ -281,14 +299,14 @@ public class WorkActivity extends AppCompatActivity {
         // PendingIntent 는, 가지고 있는 Intent 를 당장 수행하진 않고 특정 시점에 수행하도록 하는 특징을 갖고 있다
         // 특정시점에 alarmIntent(AlarmNotification)가 실행 됨
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), (int) (System.currentTimeMillis() / 1000), alarmIntent, FLAG_IMMUTABLE);
-        // 특정시점 설정
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 
-        if (alarmManager != null) {
+        if (alarmManager != null) { //특정시간에 알림이 발생
             alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(),
                     AlarmManager.INTERVAL_DAY, pendingIntent); //지정된 시간에 휴대폰 화면을 깨우고 매일 반복하여 알림을 보여줌
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Android Marshmallow 이상에서만 실행되는 코드
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // Android Marshmallow 이상에서만 실행되는 코드
                 // 사용자가 전원을 충전하지 않고 화면이 꺼진 채로 기기를 일정 기간 정지 상태로 두면 기기는 Doze 모드를 시작하게 됩니다.
                 // Doze 모드에서도 실행되는 알람을 설정해야 하는 경우 setAndAllowWhileIdle() 또는 setExactAndAllowWhileIdle()를 사용합니다.
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), pendingIntent);
