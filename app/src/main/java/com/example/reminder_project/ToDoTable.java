@@ -9,12 +9,13 @@ public class ToDoTable extends SQLiteOpenHelper {
     public static final int FIELD_NAME_CONTENTS = 1;
     public static final int FIELD_NAME_PRIORITY = 2;
     public static final int FIELD_NAME_LOCATION = 3;
-    public static final int FIELD_NAME_LAT = 4;
-    public static final int FIELD_NAME_LNG = 5;
-    public static final int FIELD_NAME_ALARM = 6;
-    public static final int FIELD_NAME_ON_CREATE = 7;
-    public static final int FIELD_NAME_IS_COMPLETE = 8;
-    public static final int FIELD_NAME_ON_COMPLETE = 9;
+    public static final int FIELD_NAME_ADDRESS = 4;
+    public static final int FIELD_NAME_LAT = 5;
+    public static final int FIELD_NAME_LNG = 6;
+    public static final int FIELD_NAME_ALARM = 7;
+    public static final int FIELD_NAME_ON_CREATE = 8;
+    public static final int FIELD_NAME_IS_COMPLETE = 9;
+    public static final int FIELD_NAME_ON_COMPLETE = 10;
 
 
     public ToDoTable(Context context){
@@ -22,7 +23,7 @@ public class ToDoTable extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE toDo(TITLE TEXT, CONTENTS TEXT,  PRIORITY INTEGER DEFAULT 0, LOCATION TEXT, LAT TEXT, LNG TEXT, ALARM TEXT, ON_CREATE TEXT PRIMARY KEY, IS_COMPLETE INTEGER DEFAULT 0, ON_COMPLETE TEXT);");
+        db.execSQL("CREATE TABLE toDo(TITLE TEXT, CONTENTS TEXT,  PRIORITY INTEGER DEFAULT 0, LOCATION TEXT, ADDRESS TEXT, LAT TEXT, LNG TEXT, ALARM TEXT, ON_CREATE TEXT PRIMARY KEY, IS_COMPLETE INTEGER DEFAULT 0, ON_COMPLETE TEXT);");
     }
 
     @Override

@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         while (cursor.moveToNext()) {
             String result = "";
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 10; i++) {
                 result += cursor.getString(i) + " ";
             }
             System.out.println("DB DATA: " + result);

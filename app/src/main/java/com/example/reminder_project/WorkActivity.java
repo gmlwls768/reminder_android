@@ -38,19 +38,19 @@ import java.util.Locale;
 
 
 @RequiresApi(api = Build.VERSION_CODES.O)
-public class WorkActivity extends AppCompatActivity {
+public class WorkActivity extends AppCompatActivity  {
     ToDoTable todo;
     SQLiteDatabase sqlDB;
     Cursor cursor;
     int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute; // 알림 시간
     boolean isModifyActivity; // 수정 or 추가 페이지 판별
 
-    EditText placeEdtTxt, titleEdtTxt, contentEdtTxt;
+    EditText titleEdtTxt, contentEdtTxt;
     RadioGroup priorityGroup;
     RadioButton highPriorityBtn, mediumPriorityBtn, lowPriorityBtn, nonePriorityBtn;
     ImageButton alarmSetBtn;
-    TextView AlarmTimeView;
-    Button placeSearchBtn, saveBtn;
+    TextView AlarmTimeView, placeInputView;
+    Button saveBtn, rmBtn;
 
 
     @SuppressLint("SetTextI18n")
@@ -77,14 +77,76 @@ public class WorkActivity extends AppCompatActivity {
 
         alarmSetBtn = (ImageButton) findViewById(R.id.alarmSetBtn);
         AlarmTimeView = (TextView) findViewById(R.id.timeText);
-        placeEdtTxt = (EditText) findViewById(R.id.placeEdtTxt);
-        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
+        placeInputView = (TextView) findViewById(R.id.placeEdtTxt);
         saveBtn = (Button) findViewById(R.id.saveBtn);
 
-        Button moveGui = (Button) findViewById(R.id.moveGui);
+        rmBtn = (Button) findViewById(R.id.rmBtn);
+
         // 수정 or 추가 페이지 판별
         Intent intent = getIntent();
         String tableRowId = intent.getStringExtra("id");
+
+
+
+
+
+        double lat = intent.getDoubleExtra("lat", -9999);
+        double lng = intent.getDoubleExtra("lng", -9999);
+
+        System.out.println("Aaaaaaa" + lat);
+        if(lat != -9999){
+            String _name = intent.getStringExtra("name");
+            alarmYear = intent.getIntExtra("alarmYear", -1);
+            alarmMonth = intent.getIntExtra("alarmMonth", -1);
+            alarmDay = intent.getIntExtra("alarmDay", -1);
+            alarmHour = intent.getIntExtra("alarmHour", -1);
+            alarmMinute = intent.getIntExtra("alarmMinute", -1);
+
+            String _titleEdtTxt = intent.getStringExtra("titleEdtTxt");
+            String _contentEdtTxt = intent.getStringExtra("contentEdtTxt");
+            String _priority = intent.getStringExtra("priority");
+
+
+            rmBtn.setVisibility(View.VISIBLE);
+            placeInputView.setText(_name);
+            titleEdtTxt.setText(_titleEdtTxt);
+            contentEdtTxt.setText(_contentEdtTxt);
+
+
+            switch (_priority){ //우선순위 설정
+                case "0":
+                    priorityGroup.check(R.id.nonePriorityBtn);
+                    break;
+                case "1":
+                    priorityGroup.check(R.id.lowPriorityBtn);
+                    break;
+                case "2":
+                    priorityGroup.check(R.id.mediumPriorityBtn);
+                    break;
+                case "3":
+                    priorityGroup.check(R.id.highPriorityBtn);
+                    break;
+            }
+
+            if(alarmDay != 0){
+                AlarmTimeView.setText(alarmYear + "년" + alarmMonth + "월" + alarmDay + "일" + alarmHour + "시" + alarmMinute + "분");
+            }
+
+
+        }
+        else{
+            rmBtn.setVisibility(View.GONE);
+
+        }
+
+
+
+
+
+
+
+
+
         if(tableRowId == null) isModifyActivity = false;
         else isModifyActivity = true;
 
@@ -93,11 +155,11 @@ public class WorkActivity extends AppCompatActivity {
             cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ON_CREATE ='" + tableRowId + "';", null); //id에 해당하는 컬럼의 값을 가져옴
             cursor.moveToFirst(); //커서를 첫번째로 이동
 
-//            String result = "";
-//            for (int i = 0; i < 8; i++) {
-//                result += cursor.getString(i) + " ";
-//            }
-//            System.out.println(result);
+            String result = "";
+            for (int i = 0; i < 10; i++) {
+                result += cursor.getString(i) + " ";
+            }
+            System.out.println(result);
 
             titleEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_TITLE)); //타이틀 설정
 
@@ -132,10 +194,22 @@ public class WorkActivity extends AppCompatActivity {
             }
 
             if(cursor.getString(ToDoTable.FIELD_NAME_LOCATION) != null){ //장소 설정
-                placeEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_LOCATION));
+                placeInputView.setText(cursor.getString(ToDoTable.FIELD_NAME_LOCATION));
             }
         }
 
+        if(!placeInputView.getText().toString().equals("")){
+            rmBtn.setVisibility(View.VISIBLE);
+        }
+        else{
+            rmBtn.setVisibility(View.GONE);
+        }
+        rmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                placeInputView.setText("");
+            }
+        });
         // 알림시간 설정
         alarmSetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,15 +223,47 @@ public class WorkActivity extends AppCompatActivity {
             }
         });
 
-        //키워드를 통해 장소를 검색
-        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
+
+
+        // 검색 리스트뷰로 이동
+        placeInputView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String placeName = placeEdtTxt.getText().toString();
                 Intent intent = new Intent(getApplicationContext(), PlaceSearchActivity.class);
-                intent.putExtra("placeName", placeName); //해당 목록의 개인키를 넘겨준다
+                intent.putExtra("alarmYear",alarmYear);
+                intent.putExtra("alarmMonth",alarmMonth);
+                intent.putExtra("alarmDay",alarmDay);
+                intent.putExtra("alarmHour",alarmHour);
+                intent.putExtra("alarmMinute",alarmMinute);
+
+
+                String _priority = "0";
+                switch (priorityGroup.getCheckedRadioButtonId()){
+                    case R.id.nonePriorityBtn:
+                        _priority = "0";
+                        break;
+                    case R.id.lowPriorityBtn:
+                        _priority = "1";
+                        break;
+                    case R.id.mediumPriorityBtn:
+                        _priority = "2";
+                        break;
+                    case R.id.highPriorityBtn:
+                        _priority = "3";
+                        break;
+                }
+                intent.putExtra("titleEdtTxt",titleEdtTxt.getText().toString());
+                intent.putExtra("contentEdtTxt",contentEdtTxt.getText().toString());
+                intent.putExtra("priority",_priority);
                 startActivity(intent);
+
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
+                finish();
+//                String placeName = placeInputView.getText().toString();
+//                Intent intent = new Intent(getApplicationContext(), PlaceSearchActivity.class);
+//                intent.putExtra("placeName", placeName); //해당 목록의 개인키를 넘겨준다
+//                startActivity(intent);
+//                overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
         });
 
@@ -185,7 +291,7 @@ public class WorkActivity extends AppCompatActivity {
                         break;
                 }
 
-                String myLocation = placeEdtTxt.getText().toString();
+                String myLocation = placeInputView.getText().toString();
                 sqlDB = todo.getWritableDatabase();
                 ContentValues cv = new ContentValues();
                 cv.put("TITLE", _Title);
@@ -227,15 +333,7 @@ public class WorkActivity extends AppCompatActivity {
             }
         });
 
-        moveGui.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MapActivity.class);
-                startActivity(intent);
-                overridePendingTransition(0, 0);//인텐트 효과 없애기
 
-            }
-        });
     }
 
     // 사용자로부터 알림날짜를 입력 받음

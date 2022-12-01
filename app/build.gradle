@@ -4,6 +4,8 @@ plugins {
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def kakaoNativeAppKey = properties.getProperty('kakao_native_app_key')
+
 
 android {
     namespace 'com.example.reminder_project'
@@ -19,6 +21,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "KAKAO_REST_API_KEY", properties['kakao_rest_api_key']
         buildConfigField "String", "KAKA0_NATIVE_APP_KEY", properties['kakao_native_app_key']
+        manifestPlaceholders = [KAKAO_NATIVE_APP_KEY: kakaoNativeAppKey]
     }
 
     buildTypes {
