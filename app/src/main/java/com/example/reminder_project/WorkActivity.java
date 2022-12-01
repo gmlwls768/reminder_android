@@ -2,7 +2,6 @@ package com.example.reminder_project;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +32,6 @@ import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -58,17 +56,19 @@ public class WorkActivity extends AppCompatActivity {
     int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute; // 알림 시간
     boolean isModifyActivity; // 수정 or 추가 페이지 판별
 
-    EditText placeEdtTxt, titleEdtTxt, contentEdtTxt;
+    EditText titleEdtTxt, contentEdtTxt;
     RadioGroup priorityGroup;
     RadioButton highPriorityBtn, mediumPriorityBtn, lowPriorityBtn, nonePriorityBtn;
     ImageButton alarmSetBtn;
-    TextView AlarmTimeView;
-    Button placeSearchBtn, saveBtn;
+    TextView AlarmTimeView, placeInputView;
+    Button saveBtn, rmBtn;
+
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -88,10 +88,12 @@ public class WorkActivity extends AppCompatActivity {
 
         alarmSetBtn = (ImageButton) findViewById(R.id.alarmSetBtn);
         AlarmTimeView = (TextView) findViewById(R.id.timeText);
-        placeEdtTxt = (EditText) findViewById(R.id.placeEdtTxt);
-        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
+        placeInputView = (TextView) findViewById(R.id.placeEdtTxt);
         saveBtn = (Button) findViewById(R.id.saveBtn);
 
+        rmBtn = (Button) findViewById(R.id.rmBtn);
+
+        // 수정 or 추가 페이지 판별
         Intent intent = getIntent();
         tableRowId = intent.getStringExtra("id");
         if(tableRowId == null) isModifyActivity = false;
@@ -101,7 +103,7 @@ public class WorkActivity extends AppCompatActivity {
         if(isReloadActivity){
             String placeName = intent.getStringExtra("placeName");
             if(placeName != null){
-                placeEdtTxt.setText(placeName);
+                placeInputView.setText(placeName);
             }
             tableRowId = prevTableRowId;
             System.out.println("tableRowId: "+tableRowId);
@@ -131,11 +133,11 @@ public class WorkActivity extends AppCompatActivity {
             cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ON_CREATE ='" + tableRowId + "';", null); //id에 해당하는 컬럼의 값을 가져옴
             cursor.moveToFirst(); //커서를 첫번째로 이동
 
-//            String result = "";
-//            for (int i = 0; i < 8; i++) {
-//                result += cursor.getString(i) + " ";
-//            }
-//            System.out.println(result);
+            String result = "";
+            for (int i = 0; i < 10; i++) {
+                result += cursor.getString(i) + " ";
+            }
+            System.out.println(result);
 
             titleEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_TITLE)); //타이틀 설정
 
@@ -170,12 +172,24 @@ public class WorkActivity extends AppCompatActivity {
             }
 
             if(cursor.getString(ToDoTable.FIELD_NAME_LOCATION) != null){ //장소 설정
-                placeEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_LOCATION));
+                placeInputView.setText(cursor.getString(ToDoTable.FIELD_NAME_LOCATION));
             }
         }
 
         isReloadActivity = false;
 
+        if(!placeInputView.getText().toString().equals("")){
+            rmBtn.setVisibility(View.VISIBLE);
+        }
+        else{
+            rmBtn.setVisibility(View.GONE);
+        }
+        rmBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                placeInputView.setText("");
+            }
+        });
         // 알림시간 설정
         alarmSetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,14 +203,15 @@ public class WorkActivity extends AppCompatActivity {
             }
         });
 
-        //키워드를 통해 장소를 검색
-        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
+
+
+        // 검색 리스트뷰로 이동
+        placeInputView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String placeName = placeEdtTxt.getText().toString();
                 Intent intent = new Intent(getApplicationContext(), PlaceSearchActivity.class);
-                intent.putExtra("placeName", placeName); //해당 목록의 개인키를 넘겨준다
                 startActivity(intent);
+
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
 
                 isReloadActivity = true;
@@ -204,20 +219,20 @@ public class WorkActivity extends AppCompatActivity {
                 prevTitle = titleEdtTxt.getText().toString();
                 prevContent = contentEdtTxt.getText().toString();
                 prevPriority = priorityGroup.getCheckedRadioButtonId();
-//                switch (priorityGroup.getCheckedRadioButtonId()){
-//                    case R.id.nonePriorityBtn:
-//                        prevPriority = 0;
-//                        break;
-//                    case R.id.lowPriorityBtn:
-//                        prevPriority = 1;
-//                        break;
-//                    case R.id.mediumPriorityBtn:
-//                        prevPriority = 2;
-//                        break;
-//                    case R.id.highPriorityBtn:
-//                        prevPriority = 3;
-//                        break;
-//                }
+                switch (priorityGroup.getCheckedRadioButtonId()){
+                    case R.id.nonePriorityBtn:
+                        prevPriority = 0;
+                        break;
+                    case R.id.lowPriorityBtn:
+                        prevPriority = 1;
+                        break;
+                    case R.id.mediumPriorityBtn:
+                        prevPriority = 2;
+                        break;
+                    case R.id.highPriorityBtn:
+                        prevPriority = 3;
+                        break;
+                }
                 prevAlarmYear = alarmYear; prevAlarmMonth = alarmMonth; prevAlarmDay = alarmDay; prevAlarmHour = alarmHour; prevAlarmMinute = alarmMinute;
             }
         });
@@ -246,7 +261,7 @@ public class WorkActivity extends AppCompatActivity {
                         break;
                 }
 
-                String myLocation = placeEdtTxt.getText().toString();
+                String myLocation = placeInputView.getText().toString();
                 sqlDB = todo.getWritableDatabase();
                 ContentValues cv = new ContentValues();
                 cv.put("TITLE", _Title);

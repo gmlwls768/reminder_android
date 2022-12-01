@@ -62,41 +62,45 @@
             android:text="우선 순위"
             android:gravity="center"
             android:layout_margin="10dp"/>
+
         <RadioGroup
             android:id="@+id/priorityGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <RadioButton
                 android:id="@+id/highPriorityBtn"
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="높음"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="높음" />
 
             <RadioButton
                 android:id="@+id/mediumPriorityBtn"
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="중간"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="중간" />
+
             <RadioButton
                 android:id="@+id/lowPriorityBtn"
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="낮음"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="낮음" />
+
             <RadioButton
                 android:id="@+id/nonePriorityBtn"
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="없음"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
                 android:checked="true"
-                android:layout_margin="10dp"/>
+                android:text="없음" />
         </RadioGroup>
     </LinearLayout>
 
@@ -104,39 +108,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="7dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="4"
             android:gravity="center"
-            android:text="장소"/>
-        <EditText
+            android:text="장소" />
+
+        <TextView
             android:id="@+id/placeEdtTxt"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:hint="장소를 입력하세요"
+            android:hint="클릭하여 장소 검색"
             android:gravity="center"
-            android:layout_weight="6"/>
+            android:layout_weight="9"/>
+
         <Button
-            android:id="@+id/placeSearchBtn"
+            android:id="@+id/rmBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="검색"
-            android:textColor="#000000"
-            android:backgroundTint="#AADBFF"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right"
-        android:orientation="horizontal">
+            android:text="삭제"
+            android:visibility="gone"
+            android:textColor="#000000"/>
         <Button
             android:id="@+id/saveBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="62dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#AADBFF"
             android:text="저장"
-            android:textColor="#000000"
-            android:backgroundTint="#AADBFF"/>
+            android:textColor="#000000" />
+
     </LinearLayout>
 
 </LinearLayout>
