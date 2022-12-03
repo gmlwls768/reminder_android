@@ -1,5 +1,8 @@
 package com.example.reminder_project;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -37,7 +40,6 @@ import java.util.concurrent.ExecutionException;
 public class PlaceSearchActivity extends AppCompatActivity {
     private ArrayList<PlaceSearchItem> items;
     EditText placeSearchEdtTxt;
-    Button placeSearchBtn;
     String resultText;
     private double baseLat; // 검색할 위도
     private double baseLng; // 검색할 경도
@@ -46,6 +48,7 @@ public class PlaceSearchActivity extends AppCompatActivity {
     private static double lng; // 특정장소의 경도
     private static String name; // 특정장소의 이름
     private static String address; // 특정장소의 주소
+    private PlaceSearchItem targetPlace; // 사용자가 선택한 장소
 
 
     @Override
@@ -71,6 +74,7 @@ public class PlaceSearchActivity extends AppCompatActivity {
         Log.i("baseLongitude", Double.toString(baseLng));
 
         Intent intent = getIntent();
+        // PlaceSearchItem 객체로 대체할 예정
         String lat_string = intent.getStringExtra("lat");
         String lng_string = intent.getStringExtra("lng");
         name = intent.getStringExtra(name);
@@ -80,7 +84,6 @@ public class PlaceSearchActivity extends AppCompatActivity {
             lng = Double.parseDouble(lng_string);
         }
 
-        System.out.println();
         RelativeLayout map_view = (RelativeLayout) findViewById(R.id.map_view);
         ListView listView = (ListView) findViewById(R.id.listView);
         Button mapSaveBtn = (Button) findViewById(R.id.mapSaveBtn);
@@ -124,19 +127,6 @@ public class PlaceSearchActivity extends AppCompatActivity {
         resultText = "";
         items = new ArrayList<>();
         placeSearchEdtTxt = (EditText) findViewById(R.id.placeSearchEdtTxt);
-//        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
-
-        Integer alarmYear = intent.getIntExtra("alarmYear", -1);
-        Integer alarmMonth = intent.getIntExtra("alarmMonth", -1);
-        Integer alarmDay = intent.getIntExtra("alarmDay", -1);
-        Integer alarmHour = intent.getIntExtra("alarmHour", -1);
-        Integer alarmMinute = intent.getIntExtra("alarmMinute", -1);
-
-        String titleEdtTxt = intent.getStringExtra("titleEdtTxt");
-        String contentEdtTxt = intent.getStringExtra("contentEdtTxt");
-        String priority = intent.getStringExtra("priority");
-        String isReloadState = intent.getStringExtra("isReloadState");
-        String tableRowId = intent.getStringExtra("tableRowId");
 
         placeSearchEdtTxt.addTextChangedListener(new TextWatcher() {
             @Override
@@ -162,6 +152,8 @@ public class PlaceSearchActivity extends AppCompatActivity {
                         @Override
                         public void onItemClick(AdapterView parent, View v, int position, long id) {
 
+                            targetPlace = pAdapter.getItem(position);
+
                             lat = pAdapter.getItem(position).getLat();
                             lng = pAdapter.getItem(position).getLng();
                             name = pAdapter.getItem(position).getName();
@@ -171,7 +163,6 @@ public class PlaceSearchActivity extends AppCompatActivity {
                             map_view.setVisibility(View.VISIBLE);
 
                             mapView.removeAllPOIItems();
-
                             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
                             mapView.setShowCurrentLocationMarker(false);
                             MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
@@ -199,84 +190,13 @@ public class PlaceSearchActivity extends AppCompatActivity {
             }
         });
 
-
-//        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                try {
-//                    items.clear();
-//                    name = placeSearchEdtTxt.getText().toString();
-//                    resultText = new PlaceSearchTask(name, baseLat, baseLng).execute().get();
-//                    jsonParsing(resultText);
-//
-//                    map_view.setVisibility(View.GONE);
-//                    listView.setVisibility(View.VISIBLE);
-//
-//                    ListView listView = (ListView) findViewById(R.id.listView);
-//                    final PlaceSearchAdapter pAdapter = new PlaceSearchAdapter(getApplicationContext(), items);
-//                    listView.setAdapter(pAdapter);
-//                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                        @Override
-//                        public void onItemClick(AdapterView parent, View v, int position, long id) {
-//
-//                            lat = pAdapter.getItem(position).getLat();
-//                            lng = pAdapter.getItem(position).getLng();
-//                            name = pAdapter.getItem(position).getName();
-//                            address = pAdapter.getItem(position).getAddress();
-//
-//                            listView.setVisibility(View.GONE);
-//                            map_view.setVisibility(View.VISIBLE);
-//
-//                            mapView.removeAllPOIItems();
-//
-//                            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
-//                            mapView.setShowCurrentLocationMarker(false);
-//                            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
-//                            mapView.setMapCenterPoint(mapPoint, true);
-//
-//
-//                            MapPOIItem marker = new MapPOIItem();
-//                            marker.setItemName(name);
-//                            marker.setTag(0);
-//                            marker.setMapPoint(mapPoint);
-//                            marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-//                            mapView.addPOIItem(marker);
-//                            mapView.setShowCurrentLocationMarker(true);
-//
-//                        }
-//                    });
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-
         mapSaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
-                intent.putExtra("lat", Double.toString(lat));
-                intent.putExtra("lng", Double.toString(lng));
-                intent.putExtra("name", name);
-                intent.putExtra("address", address);
-                intent.putExtra("tableRowId", intent.getStringExtra("tableRowId"));
-                intent.putExtra("isReloadState", intent.getStringExtra("isReloadState"));
-
-
-                intent.putExtra("titleEdtTxt", titleEdtTxt);
-                intent.putExtra("contentEdtTxt", contentEdtTxt);
-                intent.putExtra("priority", priority);
-                intent.putExtra("tableRowId", tableRowId);
-                intent.putExtra("isReloadState", isReloadState);
-
-                intent.putExtra("alarmYear", alarmYear);
-                intent.putExtra("alarmMonth", alarmMonth);
-                intent.putExtra("alarmDay", alarmDay);
-                intent.putExtra("alarmHour", alarmHour);
-                intent.putExtra("alarmMinute", alarmMinute);
-
+                intent.putExtra("changedPlace", targetPlace);
                 mapViewContainer.removeView(mapView);
-
+                intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
@@ -285,7 +205,7 @@ public class PlaceSearchActivity extends AppCompatActivity {
 
     }
 
-    //리스트 뷰를 이용하여 목록으로 보여줄 예정
+    // json을 파싱하는 함수
     private void jsonParsing(String json) {
         try {
             JSONObject jsonObject = new JSONObject(json);

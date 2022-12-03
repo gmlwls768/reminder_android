@@ -1,13 +1,15 @@
 package com.example.reminder_project;
 
-public class PlaceSearchItem {
+import java.io.Serializable;
+
+public class PlaceSearchItem implements Serializable{
     private String name;
     private String category;
     private String address;
     private double lat;
     private double lng;
 
-    public PlaceSearchItem(String name, String category, String address, double lat, double lng) {
+    public PlaceSearchItem(String name, String category, String address, double lat, double lng){
         this.name = name;
         this.category = category;
         this.address = address;
