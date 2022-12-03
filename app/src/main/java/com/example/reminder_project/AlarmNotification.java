@@ -15,11 +15,13 @@ import androidx.core.app.NotificationCompat;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 public class AlarmNotification extends BroadcastReceiver {
     ToDoTable todo; //A helper class to manage database creation and version management.
     SQLiteDatabase sqlDB;
     Cursor cursor;
+    Random rd;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -34,7 +36,7 @@ public class AlarmNotification extends BroadcastReceiver {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         //특정시점에 notificationIntent(MainActivity)을 실행함
-        PendingIntent pNotificationIntent = PendingIntent.getActivity(context, (int) Long.parseLong(tableRowId) % Integer.MAX_VALUE, notificationIntent, FLAG_IMMUTABLE);
+        PendingIntent pNotificationIntent = PendingIntent.getActivity(context, new Random().nextInt(), notificationIntent, FLAG_IMMUTABLE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "default");
 
 
@@ -79,7 +81,7 @@ public class AlarmNotification extends BroadcastReceiver {
             } else {
                 // 노티피케이션 동작시킴
                 // System.currentTimeMills()를 이용, 현재 시간을 받아와 대입하여 그때그때 id값을 다르게 지정
-                notificationManager.notify(1, builder.build());
+                notificationManager.notify(new Random().nextInt(), builder.build());
                 System.out.println("reminder notification 작동");
             }
         }

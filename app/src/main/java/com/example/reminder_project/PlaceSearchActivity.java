@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,22 +53,16 @@ public class PlaceSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_search);
 
+        //현재위치를 가져옴
         final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (location != null) {
             baseLat = location.getLongitude();
             baseLng = location.getLatitude();
-        }else{
+        } else {
             baseLat = 35.8561719;
             baseLng = 129.2247477;
         }
@@ -128,7 +124,7 @@ public class PlaceSearchActivity extends AppCompatActivity {
         resultText = "";
         items = new ArrayList<>();
         placeSearchEdtTxt = (EditText) findViewById(R.id.placeSearchEdtTxt);
-        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
+//        placeSearchBtn = (Button) findViewById(R.id.placeSearchBtn);
 
         Integer alarmYear = intent.getIntExtra("alarmYear", -1);
         Integer alarmMonth = intent.getIntExtra("alarmMonth", -1);
@@ -142,57 +138,118 @@ public class PlaceSearchActivity extends AppCompatActivity {
         String isReloadState = intent.getStringExtra("isReloadState");
         String tableRowId = intent.getStringExtra("tableRowId");
 
-        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
+        placeSearchEdtTxt.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View view) {
-                map_view.setVisibility(View.GONE);
-                listView.setVisibility(View.VISIBLE);
-                items.clear();
-                name = placeSearchEdtTxt.getText().toString();
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 try {
+                    items.clear();
+                    name = placeSearchEdtTxt.getText().toString();
                     resultText = new PlaceSearchTask(name, baseLat, baseLng).execute().get();
                     jsonParsing(resultText);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
+
+                    map_view.setVisibility(View.GONE);
+                    listView.setVisibility(View.VISIBLE);
+
+                    ListView listView = (ListView) findViewById(R.id.listView);
+                    final PlaceSearchAdapter pAdapter = new PlaceSearchAdapter(getApplicationContext(), items);
+                    listView.setAdapter(pAdapter);
+                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView parent, View v, int position, long id) {
+
+                            lat = pAdapter.getItem(position).getLat();
+                            lng = pAdapter.getItem(position).getLng();
+                            name = pAdapter.getItem(position).getName();
+                            address = pAdapter.getItem(position).getAddress();
+
+                            listView.setVisibility(View.GONE);
+                            map_view.setVisibility(View.VISIBLE);
+
+                            mapView.removeAllPOIItems();
+
+                            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+                            mapView.setShowCurrentLocationMarker(false);
+                            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
+                            mapView.setMapCenterPoint(mapPoint, true);
+
+
+                            MapPOIItem marker = new MapPOIItem();
+                            marker.setItemName(name);
+                            marker.setTag(0);
+                            marker.setMapPoint(mapPoint);
+                            marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+                            mapView.addPOIItem(marker);
+                            mapView.setShowCurrentLocationMarker(true);
+
+                        }
+                    });
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
 
-                ListView listView = (ListView) findViewById(R.id.listView);
-                final PlaceSearchAdapter pAdapter = new PlaceSearchAdapter(getApplicationContext(), items);
-                listView.setAdapter(pAdapter);
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView parent, View v, int position, long id) {
+            @Override
+            public void afterTextChanged(Editable editable) {
 
-                        lat = pAdapter.getItem(position).getLat();
-                        lng = pAdapter.getItem(position).getLng();
-                        name = pAdapter.getItem(position).getName();
-                        address = pAdapter.getItem(position).getAddress();
-
-                        listView.setVisibility(View.GONE);
-                        map_view.setVisibility(View.VISIBLE);
-
-                        mapView.removeAllPOIItems();
-
-                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
-                        mapView.setShowCurrentLocationMarker(false);
-                        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
-                        mapView.setMapCenterPoint(mapPoint, true);
-
-
-                        MapPOIItem marker = new MapPOIItem();
-                        marker.setItemName(name);
-                        marker.setTag(0);
-                        marker.setMapPoint(mapPoint);
-                        marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-                        mapView.addPOIItem(marker);
-                        mapView.setShowCurrentLocationMarker(true);
-
-                    }
-                });
             }
         });
+
+
+//        placeSearchBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                try {
+//                    items.clear();
+//                    name = placeSearchEdtTxt.getText().toString();
+//                    resultText = new PlaceSearchTask(name, baseLat, baseLng).execute().get();
+//                    jsonParsing(resultText);
+//
+//                    map_view.setVisibility(View.GONE);
+//                    listView.setVisibility(View.VISIBLE);
+//
+//                    ListView listView = (ListView) findViewById(R.id.listView);
+//                    final PlaceSearchAdapter pAdapter = new PlaceSearchAdapter(getApplicationContext(), items);
+//                    listView.setAdapter(pAdapter);
+//                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                        @Override
+//                        public void onItemClick(AdapterView parent, View v, int position, long id) {
+//
+//                            lat = pAdapter.getItem(position).getLat();
+//                            lng = pAdapter.getItem(position).getLng();
+//                            name = pAdapter.getItem(position).getName();
+//                            address = pAdapter.getItem(position).getAddress();
+//
+//                            listView.setVisibility(View.GONE);
+//                            map_view.setVisibility(View.VISIBLE);
+//
+//                            mapView.removeAllPOIItems();
+//
+//                            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+//                            mapView.setShowCurrentLocationMarker(false);
+//                            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
+//                            mapView.setMapCenterPoint(mapPoint, true);
+//
+//
+//                            MapPOIItem marker = new MapPOIItem();
+//                            marker.setItemName(name);
+//                            marker.setTag(0);
+//                            marker.setMapPoint(mapPoint);
+//                            marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+//                            mapView.addPOIItem(marker);
+//                            mapView.setShowCurrentLocationMarker(true);
+//
+//                        }
+//                    });
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
 
         mapSaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override

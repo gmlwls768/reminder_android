@@ -35,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 
 // rmbtn 출력 여부
@@ -225,7 +226,6 @@ public class WorkActivity extends AppCompatActivity  {
                 intent.putExtra("isReloadState", "1");
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
-
                 intent.putExtra("name", name);
 
                 String _priority = "0";
@@ -375,7 +375,7 @@ public class WorkActivity extends AppCompatActivity  {
 
         //설정한 날짜를 Toast 메시지로 보여줌
         Date currentDateTime = calendar.getTime();
-        String date = new SimpleDateFormat("yyyy년 MM월 dd일 EE a hh시 mm분", Locale.getDefault()).format(currentDateTime);
+        String date = new SimpleDateFormat("yyyy년 MM월 dd일 E요일 a hh시 mm분", Locale.KOREAN).format(currentDateTime);
         Toast.makeText(getApplicationContext(), date + "으로 알림이 설정되었습니다!", Toast.LENGTH_SHORT).show();
         return calendar;
     }
@@ -388,7 +388,8 @@ public class WorkActivity extends AppCompatActivity  {
         alarmIntent.putExtra("tableRowId", tableRowId);
         // PendingIntent 는, 가지고 있는 Intent 를 당장 수행하진 않고 특정 시점에 수행하도록 하는 특징을 갖고 있다
         // 특정시점에 alarmIntent(AlarmNotification)가 실행 됨
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), (int) (System.currentTimeMillis() / 1000), alarmIntent, FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), new Random().nextInt(), alarmIntent, FLAG_IMMUTABLE);
+
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 
         if (alarmManager != null) { //특정시간에 알림이 발생

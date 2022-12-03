@@ -23,7 +23,7 @@
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value="" />
+            android:value="346b23ddf4d26409a1d67faba59af810" />
 
         <activity
             android:name=".WorkActivity"

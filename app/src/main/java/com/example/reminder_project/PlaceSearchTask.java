@@ -29,7 +29,7 @@ public class PlaceSearchTask extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected String doInBackground(String... params) {
+    protected String doInBackground(String... params){
         URL url = null;
         try {
 //            url = new URL("https://dapi.kakao.com/v2/local/search/category.json?category_group_code=PM9&radius=20000"); // 서버 URL
@@ -47,23 +47,13 @@ public class PlaceSearchTask extends AsyncTask<String, Void, String> {
                 }
                 receiveMsg = buffer.toString();
                 Log.i("receiveMsg : ", receiveMsg);
-
                 reader.close();
             } else {
-                InputStream in = conn.getErrorStream();
-                Log.i("결과", conn.getResponseCode() + "Error");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    System.out.printf("%s\n", line);
-                }
+                throw new Exception();
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
         return receiveMsg;
     }
 }
