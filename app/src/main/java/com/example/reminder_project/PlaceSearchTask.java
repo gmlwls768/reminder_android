@@ -1,6 +1,7 @@
 package com.example.reminder_project;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,7 +16,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class PlaceSearchTask extends AsyncTask<String, Void, String> {
 
-    String clientKey = "KakaoAK 7c1805f4786a51b62c5e74a91f1f85d6";
+    String clientKey = BuildConfig.KAKAO_REST_API_KEY;
     private String str, receiveMsg;
     private String placeName;
 

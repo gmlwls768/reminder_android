@@ -37,13 +37,17 @@ import java.util.Date;
 import java.util.Locale;
 
 
+// rmbtn 출력 여부
+
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class WorkActivity extends AppCompatActivity  {
-    ToDoTable todo;
-    SQLiteDatabase sqlDB;
-    Cursor cursor;
-    int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute; // 알림 시간
-    boolean isModifyActivity; // 수정 or 추가 페이지 판별
+    private ToDoTable todo;
+    private SQLiteDatabase sqlDB;
+    private Cursor cursor;
+
+    private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute; // 알림 시간
+    private boolean isModifyActivity; // 수정 or 추가 페이지 판별
+    private String tableRowId, lat, lng, address, name;
 
     EditText titleEdtTxt, contentEdtTxt;
     RadioGroup priorityGroup;
@@ -84,36 +88,29 @@ public class WorkActivity extends AppCompatActivity  {
 
         // 수정 or 추가 페이지 판별
         Intent intent = getIntent();
-        String tableRowId = intent.getStringExtra("id");
+        tableRowId = intent.getStringExtra("id");
+        if(tableRowId != null) isModifyActivity = true;
+        else isModifyActivity = false;
 
 
+        lat = intent.getStringExtra("lat");
+        lng = intent.getStringExtra("lng");
+        address = intent.getStringExtra("address");
+        System.out.println("isReloadState: " + intent.getStringExtra("isReloadState"));
+        if(intent.getStringExtra("isReloadState") != null) { // 장소를 검색하고 돌아온 경우
+            tableRowId = intent.getStringExtra("tableRowId");
+            placeInputView.setText(intent.getStringExtra("name"));
+            titleEdtTxt.setText(intent.getStringExtra("titleEdtTxt"));
+            contentEdtTxt.setText(intent.getStringExtra("contentEdtTxt"));
+            alarmYear = intent.getIntExtra("alarmYear", 0);
+            alarmMonth = intent.getIntExtra("alarmMonth", 0);
+            alarmDay = intent.getIntExtra("alarmDay", 0);
+            alarmHour = intent.getIntExtra("alarmHour", 0);
+            alarmMinute = intent.getIntExtra("alarmMinute", 0);
 
+            name = intent.getStringExtra("name");
 
-
-        double lat = intent.getDoubleExtra("lat", -9999);
-        double lng = intent.getDoubleExtra("lng", -9999);
-
-        System.out.println("Aaaaaaa" + lat);
-        if(lat != -9999){
-            String _name = intent.getStringExtra("name");
-            alarmYear = intent.getIntExtra("alarmYear", -1);
-            alarmMonth = intent.getIntExtra("alarmMonth", -1);
-            alarmDay = intent.getIntExtra("alarmDay", -1);
-            alarmHour = intent.getIntExtra("alarmHour", -1);
-            alarmMinute = intent.getIntExtra("alarmMinute", -1);
-
-            String _titleEdtTxt = intent.getStringExtra("titleEdtTxt");
-            String _contentEdtTxt = intent.getStringExtra("contentEdtTxt");
-            String _priority = intent.getStringExtra("priority");
-
-
-            rmBtn.setVisibility(View.VISIBLE);
-            placeInputView.setText(_name);
-            titleEdtTxt.setText(_titleEdtTxt);
-            contentEdtTxt.setText(_contentEdtTxt);
-
-
-            switch (_priority){ //우선순위 설정
+            switch (intent.getStringExtra("priority")) { //우선순위 설정
                 case "0":
                     priorityGroup.check(R.id.nonePriorityBtn);
                     break;
@@ -128,40 +125,25 @@ public class WorkActivity extends AppCompatActivity  {
                     break;
             }
 
-            if(alarmDay != 0){
+            if (alarmDay != 0) {
                 AlarmTimeView.setText(alarmYear + "년" + alarmMonth + "월" + alarmDay + "일" + alarmHour + "시" + alarmMinute + "분");
             }
 
-
-        }
-        else{
-            rmBtn.setVisibility(View.GONE);
-
-        }
-
-
-
-
-
-
-
-
-
-        if(tableRowId == null) isModifyActivity = false;
-        else isModifyActivity = true;
-
-        if (isModifyActivity) {
+        }else if(isModifyActivity) {
             sqlDB = todo.getReadableDatabase(); //Create and/or open a database
             cursor = sqlDB.rawQuery("SELECT * FROM toDo WHERE ON_CREATE ='" + tableRowId + "';", null); //id에 해당하는 컬럼의 값을 가져옴
             cursor.moveToFirst(); //커서를 첫번째로 이동
 
             String result = "";
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 11; i++) {
                 result += cursor.getString(i) + " ";
             }
             System.out.println(result);
 
             titleEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_TITLE)); //타이틀 설정
+            lat = cursor.getString(ToDoTable.FIELD_NAME_LAT);
+            lng = cursor.getString(ToDoTable.FIELD_NAME_LNG);
+            address = cursor.getString(ToDoTable.FIELD_NAME_ADDRESS);
 
             if(cursor.getString(ToDoTable.FIELD_NAME_CONTENTS) != null){ //할일 내용 설절
                 contentEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_CONTENTS));
@@ -204,12 +186,14 @@ public class WorkActivity extends AppCompatActivity  {
         else{
             rmBtn.setVisibility(View.GONE);
         }
+
         rmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 placeInputView.setText("");
             }
         });
+
         // 알림시간 설정
         alarmSetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -235,7 +219,14 @@ public class WorkActivity extends AppCompatActivity  {
                 intent.putExtra("alarmDay",alarmDay);
                 intent.putExtra("alarmHour",alarmHour);
                 intent.putExtra("alarmMinute",alarmMinute);
+                intent.putExtra("titleEdtTxt",titleEdtTxt.getText().toString());
+                intent.putExtra("contentEdtTxt",contentEdtTxt.getText().toString());
+                intent.putExtra("tableRowId", tableRowId);
+                intent.putExtra("isReloadState", "1");
+                intent.putExtra("lat", lat);
+                intent.putExtra("lng", lng);
 
+                intent.putExtra("name", name);
 
                 String _priority = "0";
                 switch (priorityGroup.getCheckedRadioButtonId()){
@@ -252,9 +243,8 @@ public class WorkActivity extends AppCompatActivity  {
                         _priority = "3";
                         break;
                 }
-                intent.putExtra("titleEdtTxt",titleEdtTxt.getText().toString());
-                intent.putExtra("contentEdtTxt",contentEdtTxt.getText().toString());
                 intent.putExtra("priority",_priority);
+
                 startActivity(intent);
 
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
@@ -298,6 +288,10 @@ public class WorkActivity extends AppCompatActivity  {
                 cv.put("CONTENTS", _Contents);
                 cv.put("PRIORITY", _priority);
                 cv.put("LOCATION", myLocation);
+                cv.put("ADDRESS", address);
+                cv.put("LAT", lat);
+                cv.put("LNG", lng);
+
 
                 if(alarmDay == 0){ //날짜가 지정되지 않은 경우
                     if (isModifyActivity) {
@@ -315,7 +309,7 @@ public class WorkActivity extends AppCompatActivity  {
                     String _alarm = new SimpleDateFormat("yyyy/MM/dd/HH/mm").format(alarmTime);
                     cv.put("ALARM", _alarm);
 
-                    if (isModifyActivity) {
+                    if (tableRowId != null) {
                         sqlDB.update("toDo", cv, "ON_CREATE='" + tableRowId + "'", null);
                         makeAlarm(alarmCalendar, alarmTitle, alarmSummary, tableRowId);
                     }else{
