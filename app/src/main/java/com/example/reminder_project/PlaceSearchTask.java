@@ -1,6 +1,7 @@
 package com.example.reminder_project;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,12 +16,16 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class PlaceSearchTask extends AsyncTask<String, Void, String> {
 
-    String clientKey = "KakaoAK 7c1805f4786a51b62c5e74a91f1f85d6";
+    String clientKey = BuildConfig.KAKAO_REST_API_KEY;
     private String str, receiveMsg;
     private String placeName;
+    private double baseLat;
+    private double baseLng;
 
-    public PlaceSearchTask(String placeName){
+    public PlaceSearchTask(String placeName, double baseLat, double baseLng) {
         this.placeName = placeName;
+        this.baseLat = baseLat;
+        this.baseLng = baseLng;
     }
 
     @Override
@@ -28,14 +33,10 @@ public class PlaceSearchTask extends AsyncTask<String, Void, String> {
         URL url = null;
         try {
 //            url = new URL("https://dapi.kakao.com/v2/local/search/category.json?category_group_code=PM9&radius=20000"); // 서버 URL
-            url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json?y=35.8561719&x=129.2247477&radius=20000&query=" + placeName);
+            url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json?y=" + baseLat + "&x=" + baseLng + "&radius=20000&query=" + placeName);
             HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-//            conn.setRequestProperty("User-Agent", USER_AGENT);
             conn.setRequestProperty("Authorization", clientKey);
-//            conn.setConnectTimeout(10000);
-            // Read시 연결 시간
-//            conn.setReadTimeout(100000);
 
             if (conn.getResponseCode() == conn.HTTP_OK) {
                 InputStreamReader tmp = new InputStreamReader(conn.getInputStream(), "UTF-8");
