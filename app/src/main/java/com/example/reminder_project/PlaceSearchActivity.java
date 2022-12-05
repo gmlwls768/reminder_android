@@ -23,8 +23,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
@@ -35,26 +33,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 public class PlaceSearchActivity extends AppCompatActivity {
     private ArrayList<PlaceSearchItem> items;
+    private PlaceSearchItem changedPlace; // 사용자가 선택한 장소
     EditText placeSearchEdtTxt;
-    String resultText;
-    private double baseLat; // 검색할 위도
-    private double baseLng; // 검색할 경도
-
-    private static double lat; // 특정장소의 위도
-    private static double lng; // 특정장소의 경도
-    private static String name; // 특정장소의 이름
-    private static String address; // 특정장소의 주소
-    private PlaceSearchItem targetPlace; // 사용자가 선택한 장소
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_search);
+        Intent intent = getIntent();
+        placeSearchEdtTxt = (EditText) findViewById(R.id.placeSearchEdtTxt);
+        items = new ArrayList<>();
 
         //현재위치를 가져옴
         final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -62,6 +54,8 @@ public class PlaceSearchActivity extends AppCompatActivity {
             return;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        double baseLat; // 검색할 위도
+        double baseLng; // 검색할 경도
         if (location != null) {
             baseLat = location.getLongitude();
             baseLng = location.getLatitude();
@@ -73,34 +67,23 @@ public class PlaceSearchActivity extends AppCompatActivity {
         Log.i("baseLatitude", Double.toString(baseLat));
         Log.i("baseLongitude", Double.toString(baseLng));
 
-        Intent intent = getIntent();
-        // PlaceSearchItem 객체로 대체할 예정
-        String lat_string = intent.getStringExtra("lat");
-        String lng_string = intent.getStringExtra("lng");
-        name = intent.getStringExtra(name);
-
-        if (lat_string != null) {
-            lat = Double.parseDouble(lat_string);
-            lng = Double.parseDouble(lng_string);
-        }
 
         RelativeLayout map_view = (RelativeLayout) findViewById(R.id.map_view);
         ListView listView = (ListView) findViewById(R.id.listView);
         Button mapSaveBtn = (Button) findViewById(R.id.mapSaveBtn);
-
 
         listView.setVisibility(View.GONE);
 
         net.daum.mf.map.api.MapView mapView = new net.daum.mf.map.api.MapView(this);
         ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
         mapViewContainer.addView(mapView, 0);
-        System.out.println("ADaaaaaaaaaaaaa" + lat);
 
-        if (lat_string == null) {
+        PlaceSearchItem currentPlace = (PlaceSearchItem) intent.getSerializableExtra("currentPlace");
+        if (currentPlace == null) {
             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
             mapView.setShowCurrentLocationMarker(true);
-        } else {
 
+        }else{
             listView.setVisibility(View.GONE);
             map_view.setVisibility(View.VISIBLE);
 
@@ -108,25 +91,18 @@ public class PlaceSearchActivity extends AppCompatActivity {
 
             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
             mapView.setShowCurrentLocationMarker(false);
-            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
+            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(currentPlace.getLat(), currentPlace.getLng());
             mapView.setMapCenterPoint(mapPoint, true);
 
 
             MapPOIItem marker = new MapPOIItem();
-            marker.setItemName(name);
+            marker.setItemName(currentPlace.getName());
             marker.setTag(0);
             marker.setMapPoint(mapPoint);
             marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
             mapView.addPOIItem(marker);
 //            mapView.setShowCurrentLocationMarker(true);
-
-
         }
-
-
-        resultText = "";
-        items = new ArrayList<>();
-        placeSearchEdtTxt = (EditText) findViewById(R.id.placeSearchEdtTxt);
 
         placeSearchEdtTxt.addTextChangedListener(new TextWatcher() {
             @Override
@@ -138,8 +114,8 @@ public class PlaceSearchActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 try {
                     items.clear();
-                    name = placeSearchEdtTxt.getText().toString();
-                    resultText = new PlaceSearchTask(name, baseLat, baseLng).execute().get();
+                    String query = placeSearchEdtTxt.getText().toString();
+                    String resultText = new PlaceSearchTask(query, baseLat, baseLng).execute().get();
                     jsonParsing(resultText);
 
                     map_view.setVisibility(View.GONE);
@@ -151,26 +127,19 @@ public class PlaceSearchActivity extends AppCompatActivity {
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView parent, View v, int position, long id) {
-
-                            targetPlace = pAdapter.getItem(position);
-
-                            lat = pAdapter.getItem(position).getLat();
-                            lng = pAdapter.getItem(position).getLng();
-                            name = pAdapter.getItem(position).getName();
-                            address = pAdapter.getItem(position).getAddress();
-
+                            PlaceSearchActivity.this.changedPlace = pAdapter.getItem(position);
                             listView.setVisibility(View.GONE);
                             map_view.setVisibility(View.VISIBLE);
 
                             mapView.removeAllPOIItems();
                             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
                             mapView.setShowCurrentLocationMarker(false);
-                            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
+                            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(PlaceSearchActivity.this.changedPlace.getLat(), PlaceSearchActivity.this.changedPlace.getLng());
                             mapView.setMapCenterPoint(mapPoint, true);
 
 
                             MapPOIItem marker = new MapPOIItem();
-                            marker.setItemName(name);
+                            marker.setItemName(PlaceSearchActivity.this.changedPlace.getName());
                             marker.setTag(0);
                             marker.setMapPoint(mapPoint);
                             marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
@@ -194,7 +163,7 @@ public class PlaceSearchActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), WorkActivity.class);
-                intent.putExtra("changedPlace", targetPlace);
+                intent.putExtra("changedPlace", PlaceSearchActivity.this.changedPlace);
                 mapViewContainer.removeView(mapView);
                 intent.addFlags(FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);

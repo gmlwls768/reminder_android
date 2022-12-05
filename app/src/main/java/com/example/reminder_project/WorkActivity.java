@@ -38,8 +38,6 @@ import java.util.Locale;
 import java.util.Random;
 
 
-// rmbtn 출력 여부
-
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class WorkActivity extends AppCompatActivity {
     private ToDoTable todo;
@@ -48,7 +46,7 @@ public class WorkActivity extends AppCompatActivity {
 
     private int alarmYear, alarmMonth, alarmDay, alarmHour, alarmMinute; // 알림 시간
     private boolean isModifyActivity; // 수정 or 추가 페이지 판별
-    private String tableRowId, lat, lng, address, name;
+    private String tableRowId, lat, lng, address, placeName;
 
     EditText titleEdtTxt, contentEdtTxt;
     RadioGroup priorityGroup;
@@ -67,6 +65,7 @@ public class WorkActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
+        placeName = null;
         alarmYear = 0;
         alarmMonth = 0;
         alarmDay = 0;
@@ -109,9 +108,6 @@ public class WorkActivity extends AppCompatActivity {
             System.out.println(result);
 
             titleEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_TITLE)); //타이틀 설정
-            lat = cursor.getString(ToDoTable.FIELD_NAME_LAT);
-            lng = cursor.getString(ToDoTable.FIELD_NAME_LNG);
-            address = cursor.getString(ToDoTable.FIELD_NAME_ADDRESS);
 
             if (cursor.getString(ToDoTable.FIELD_NAME_CONTENTS) != null) { //할일 내용 설절
                 contentEdtTxt.setText(cursor.getString(ToDoTable.FIELD_NAME_CONTENTS));
@@ -145,14 +141,11 @@ public class WorkActivity extends AppCompatActivity {
 
             if (cursor.getString(ToDoTable.FIELD_NAME_LOCATION) != null) { //장소 설정
                 placeInputView.setText(cursor.getString(ToDoTable.FIELD_NAME_LOCATION));
+                placeName = cursor.getString(ToDoTable.FIELD_NAME_LOCATION);
+                lat = cursor.getString(ToDoTable.FIELD_NAME_LAT);
+                lng = cursor.getString(ToDoTable.FIELD_NAME_LNG);
+                address = cursor.getString(ToDoTable.FIELD_NAME_ADDRESS);
             }
-        }
-
-        PlaceSearchItem changedPlace = (PlaceSearchItem) intent.getSerializableExtra("changedPlace");
-        System.out.println("changedPlace " + changedPlace);
-        System.out.println("name " + intent.getStringExtra("name"));
-        if (changedPlace != null) {
-            placeInputView.setText(changedPlace.getName());
         }
 
         if (!placeInputView.getText().toString().equals("")) {
@@ -165,6 +158,8 @@ public class WorkActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 placeInputView.setText("");
+                rmBtn.setVisibility(View.GONE);
+                placeName = null;
             }
         });
 
@@ -186,28 +181,15 @@ public class WorkActivity extends AppCompatActivity {
         placeInputView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                System.out.println("placeName " + placeName);
+                System.out.println("placeLat " + address);
+                System.out.println("placeLat " + lat);
+                System.out.println("placeLng " + lng);
                 Intent intent = new Intent(getApplicationContext(), PlaceSearchActivity.class);
-                intent.putExtra("lat", lat);
-                intent.putExtra("lng", lng);
-                intent.putExtra("name", name);
-
-                String _priority = "0";
-                switch (priorityGroup.getCheckedRadioButtonId()) {
-                    case R.id.nonePriorityBtn:
-                        _priority = "0";
-                        break;
-                    case R.id.lowPriorityBtn:
-                        _priority = "1";
-                        break;
-                    case R.id.mediumPriorityBtn:
-                        _priority = "2";
-                        break;
-                    case R.id.highPriorityBtn:
-                        _priority = "3";
-                        break;
+                if (placeName != null) {
+                    PlaceSearchItem currentPlace = new PlaceSearchItem(placeName, "", address, Double.parseDouble(lat), Double.parseDouble(lng));
+                    intent.putExtra("currentPlace", currentPlace);
                 }
-                intent.putExtra("priority", _priority);
-
                 startActivity(intent);
                 overridePendingTransition(0, 0);//인텐트 효과 없애기
             }
@@ -295,6 +277,7 @@ public class WorkActivity extends AppCompatActivity {
         System.out.println("changedPlace " + changedPlace);
         if (changedPlace != null) {
             placeInputView.setText(changedPlace.getName());
+            placeName = changedPlace.getName();
             lat = Double.toString(changedPlace.getLat());
             lng = Double.toString(changedPlace.getLng());
             address = changedPlace.getAddress();
